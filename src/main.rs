@@ -1,3 +1,7 @@
+mod db;
+pub mod models;
+pub mod schema;
+
 use std::sync::Mutex;
 
 use actix_web::{get, web, App, HttpResponse, HttpServer, Responder};
@@ -18,6 +22,8 @@ async fn hello(data: web::Data<AppState>) -> impl Responder {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    let db = db::establish_connection();
+
     let app_state = web::Data::new(AppState {
         app_name: "Actix-web".to_string(),
         counter: Mutex::new(0),
