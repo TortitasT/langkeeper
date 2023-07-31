@@ -1,11 +1,3 @@
-## Development
-
-Create database and run migrations (requires diesel_cli).
-
-```bash
-diesel setup
-```
-
 ## Diesel with sqlite install on Windows for development
 
 Install sqlite with chocolatey.
@@ -28,3 +20,11 @@ $Env:SQLITE3_LIB_DIR = "C:\ProgramData\chocolatey\lib\SQLite\tools"
 ```
 
 Install diesel as the oficial site says.
+
+## Development
+
+Create database and run migrations (requires diesel_cli).
+
+```bash
+diesel setup
+```
