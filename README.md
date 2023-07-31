@@ -6,7 +6,7 @@ Install sqlite with chocolatey.
 choco install sqlite
 ```
 
-Create `.lib` with the following command on the directory where the `dll` is.
+Create `.lib` with the following command (needs to be run with Visual Studio Development Console for `lib` to be available) on the directory where the `dll` is.
 
 ```powershell
 cd C:\ProgramData\chocolatey\lib\SQLite\tools
