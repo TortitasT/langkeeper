@@ -1,3 +1,11 @@
+## Development
+
+Create database and run migrations (requires diesel_cli).
+
+```bash
+diesel setup
+```
+
 ## Diesel with sqlite install on Windows for development
 
 Install sqlite with chocolatey.
