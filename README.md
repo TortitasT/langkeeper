@@ -19,7 +19,11 @@ Add path to environment variable.
 $Env:SQLITE3_LIB_DIR = "C:\ProgramData\chocolatey\lib\SQLite\tools"
 ```
 
-Install diesel as the oficial site says.
+Install diesel_cli with the following command.
+
+```powershell
+cargo install diesel_cli --no-default-features --features postgres
+```
 
 ## Development
 
