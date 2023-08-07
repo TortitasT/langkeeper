@@ -1,8 +1,8 @@
 use diesel::prelude::*;
-use garde::{Valid, Validate};
+use garde::Validate;
 use serde::{Deserialize, Serialize};
 
-#[derive(Queryable, Selectable, Serialize)]
+#[derive(Queryable, Selectable, Serialize, Deserialize)]
 #[diesel(table_name = crate::schema::users)]
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
 pub struct User {
@@ -21,6 +21,15 @@ pub struct NewUser {
     #[garde(ascii, length(min = 3, max = 20))]
     pub name: String,
 
+    #[garde(email)]
+    pub email: String,
+
+    #[garde(alphanumeric, length(min = 8))]
+    pub password: String,
+}
+
+#[derive(Deserialize, Validate)]
+pub struct LoginUser {
     #[garde(email)]
     pub email: String,
 
