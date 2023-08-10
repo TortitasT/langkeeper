@@ -20,5 +20,4 @@ bcrypt = "0.15.0"
 actix-session = { version = "0.7.2", features = ["cookie-session"] }
 env_logger = "0.10.0"
 log = "0.4.19"
-v = "0.1.0"
 diesel_migrations = "2.1.0"

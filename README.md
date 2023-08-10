@@ -32,3 +32,9 @@ Create database and run migrations (requires diesel_cli).
 ```bash
 diesel setup
 ```
+
+Run with watch.
+
+```bash
+cargo watch -x run
+```

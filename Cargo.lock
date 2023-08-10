@@ -1136,7 +1136,6 @@ dependencies = [
  "r2d2",
  "serde",
  "serde_json",
- "v",
 ]
 
 [[package]]
@@ -2030,12 +2029,6 @@ dependencies = [
  "idna 0.4.0",
  "percent-encoding",
 ]
-
-[[package]]
-name = "v"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "23bf1cdfefda84a01134d6a5a9815fbf66c8df618f03b8c2296e6d06041a2e75"
 
 [[package]]
 name = "vcpkg"
