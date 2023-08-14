@@ -1,63 +1,41 @@
-use std::future::{ready, Ready};
+use actix_session::SessionExt;
+use actix_web::FromRequest;
 
-use actix_web::{
-    dev::{forward_ready, Service, ServiceRequest, ServiceResponse, Transform},
-    Error,
-};
-use futures_util::future::LocalBoxFuture;
+use crate::jwt;
 
-// There are two steps in middleware processing.
-// 1. Middleware initialization, middleware factory gets called with
-//    next service in chain as parameter.
-// 2. Middleware's call method gets called with normal request.
-pub struct SayHi;
-
-// Middleware factory is `Transform` trait
-// `S` - type of the next service
-// `B` - type of response's body
-impl<S, B> Transform<S, ServiceRequest> for SayHi
-where
-    S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error>,
-    S::Future: 'static,
-    B: 'static,
-{
-    type Response = ServiceResponse<B>;
-    type Error = Error;
-    type InitError = ();
-    type Transform = SayHiMiddleware<S>;
-    type Future = Ready<Result<Self::Transform, Self::InitError>>;
-
-    fn new_transform(&self, service: S) -> Self::Future {
-        ready(Ok(SayHiMiddleware { service }))
-    }
+pub struct AuthMiddleware {
+    pub user_id: i32,
 }
 
-pub struct SayHiMiddleware<S> {
-    service: S,
-}
+impl FromRequest for AuthMiddleware {
+    type Error = actix_web::Error;
+    type Future = futures::future::Ready<Result<Self, Self::Error>>;
 
-impl<S, B> Service<ServiceRequest> for SayHiMiddleware<S>
-where
-    S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error>,
-    S::Future: 'static,
-    B: 'static,
-{
-    type Response = ServiceResponse<B>;
-    type Error = Error;
-    type Future = LocalBoxFuture<'static, Result<Self::Response, Self::Error>>;
+    fn from_request(req: &actix_web::HttpRequest, _: &mut actix_web::dev::Payload) -> Self::Future {
+        let session = req.get_session();
+        let token = match session.get::<String>("token") {
+            Ok(token) => match token {
+                Some(token) => token,
+                None => {
+                    return futures::future::err(actix_web::error::ErrorUnauthorized(
+                        "Unauthorized",
+                    ))
+                }
+            },
+            Err(_) => {
+                return futures::future::err(actix_web::error::ErrorUnauthorized("Unauthorized"))
+            }
+        };
 
-    forward_ready!(service);
+        let claims = match jwt::decode_auth_jwt(&token) {
+            Ok(decoded) => decoded,
+            Err(_) => {
+                return futures::future::err(actix_web::error::ErrorUnauthorized("Unauthorized"))
+            }
+        };
 
-    fn call(&self, req: ServiceRequest) -> Self::Future {
-        println!("Hi from start. You requested: {}", req.path());
-
-        let fut = self.service.call(req);
-
-        Box::pin(async move {
-            let res = fut.await?;
-
-            println!("Hi from response");
-            Ok(res)
+        futures::future::ok(AuthMiddleware {
+            user_id: claims.sub,
         })
     }
 }

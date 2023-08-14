@@ -5,7 +5,7 @@ use actix_web::{
 };
 use garde::Validate;
 
-use crate::{jwt, schema::users::dsl::users};
+use crate::{jwt, middlewares::auth::AuthMiddleware, schema::users::dsl::users};
 use diesel::prelude::*;
 use diesel::RunQueryDsl;
 
@@ -89,19 +89,18 @@ pub async fn user_controller_create(
     }
 }
 
-pub async fn user_controller_show(session: Session) -> impl actix_web::Responder {
-    let token = match session.get::<String>("token") {
-        Ok(token) => match token {
-            Some(token) => token,
-            None => return actix_web::HttpResponse::Ok().body("No token"),
-        },
-        Err(_) => return actix_web::HttpResponse::Ok().body("No token"),
-    };
+pub async fn user_controller_show(
+    db_pool: Data<crate::DbPool>,
+    auth_middleware: AuthMiddleware,
+) -> impl actix_web::Responder {
+    let mut conn = db_pool.get().unwrap();
 
-    let decoded = match jwt::decode_auth_jwt(&token) {
-        Ok(decoded) => decoded,
-        Err(_) => return actix_web::HttpResponse::Ok().body("Invalid token"),
-    };
+    let user = users
+        .find(auth_middleware.user_id)
+        .first::<crate::models::User>(&mut *conn);
 
-    actix_web::HttpResponse::Ok().body(decoded.sub.to_string())
+    match user {
+        Ok(user) => HttpResponse::Ok().json(user),
+        Err(_) => HttpResponse::InternalServerError().body("Something went wrong"),
+    }
 }

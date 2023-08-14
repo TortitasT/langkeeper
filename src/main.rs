@@ -39,7 +39,6 @@ async fn main() -> std::io::Result<()> {
             )
             .app_data(web::Data::new(pool.clone()))
             .service(web::scope("/user")
-                    .wrap(middlewares::auth::SayHi)
                     .route("", web::get().to(controllers::users::user_controller_show)))
             .service(web::scope("/users")
                     .route("", web::get().to(controllers::users::user_controller_list))
