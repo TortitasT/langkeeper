@@ -1,6 +1,5 @@
 use actix_session::Session;
 use actix_web::{
-    get, post,
     web::{Data, Json},
     HttpResponse, Responder,
 };
@@ -10,7 +9,6 @@ use crate::{jwt, schema::users::dsl::users};
 use diesel::prelude::*;
 use diesel::RunQueryDsl;
 
-#[get("/users")]
 pub async fn user_controller_list(db_pool: Data<crate::DbPool>) -> impl Responder {
     let mut conn = db_pool.get().unwrap();
 
@@ -29,7 +27,6 @@ pub async fn user_controller_list(db_pool: Data<crate::DbPool>) -> impl Responde
     HttpResponse::Ok().json(results)
 }
 
-#[post("/user/login")]
 pub async fn user_controller_login(
     user: Json<crate::resources::LoginUser>,
     db_pool: Data<crate::DbPool>,
@@ -61,7 +58,6 @@ pub async fn user_controller_login(
     }
 }
 
-#[post("/user")]
 pub async fn user_controller_create(
     user: Json<crate::resources::NewUser>,
     db_pool: Data<crate::DbPool>,
@@ -93,8 +89,7 @@ pub async fn user_controller_create(
     }
 }
 
-#[actix_web::get("/user")]
-async fn user_controller_show(session: Session) -> impl actix_web::Responder {
+pub async fn user_controller_show(session: Session) -> impl actix_web::Responder {
     let token = match session.get::<String>("token") {
         Ok(token) => match token {
             Some(token) => token,

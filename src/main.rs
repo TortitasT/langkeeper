@@ -38,10 +38,13 @@ async fn main() -> std::io::Result<()> {
                     .build(),
             )
             .app_data(web::Data::new(pool.clone()))
-            .service(controllers::users::user_controller_show)
-            .service(controllers::users::user_controller_list)
-            .service(controllers::users::user_controller_create)
-            .service(controllers::users::user_controller_login)
+            .service(web::scope("/user")
+                    .wrap(middlewares::auth::SayHi)
+                    .route("", web::get().to(controllers::users::user_controller_show)))
+            .service(web::scope("/users")
+                    .route("", web::get().to(controllers::users::user_controller_list))
+                    .route("", web::post().to(controllers::users::user_controller_create))
+                    .route("/login", web::post().to(controllers::users::user_controller_login)))
     })
     .bind((address, port))?
     .run()
