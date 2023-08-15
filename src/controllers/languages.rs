@@ -33,24 +33,14 @@ pub async fn language_controller_ping(
 ) -> impl Responder {
     let mut conn = db_pool.get().unwrap();
 
-    let user = match get_user_by_id(auth_middleware.user_id, &mut *conn) {
-        Ok(user) => user,
-        Err(_) => {
-            return HttpResponse::BadRequest().body("User not found");
-        }
-    };
     let language = match get_language_by_extension(&request.extension, &mut *conn) {
         Ok(language) => language,
         Err(_) => {
             return HttpResponse::BadRequest().body("Language not found");
         }
-    };
-    let users_languages = match get_or_create_user_languages(&user, &language, &mut *conn) {
-        Ok(users_languages) => users_languages,
-        Err(_) => {
-            return HttpResponse::BadRequest().body("User language not found");
-        }
-    };
+    }; // TODO: can be done inside get_or_create_user_languages in one query
+    let users_languages =
+        get_or_create_user_languages(&auth_middleware.user_id, &language, &mut *conn);
 
     diesel::update(&users_languages)
         .set(users_languages::minutes.eq(users_languages.minutes + 1))
@@ -58,7 +48,7 @@ pub async fn language_controller_ping(
         .unwrap();
 
     let response = PingResponse {
-        user_id: user.id,
+        user_id: auth_middleware.user_id,
         language_id: language.id,
         language_name: language.name,
         language_extension: language.extension,
@@ -87,21 +77,21 @@ fn get_language_by_extension(
 }
 
 fn get_or_create_user_languages(
-    user: &crate::models::User,
+    user_id: &i32,
     language: &crate::models::Language,
     conn: &mut diesel::SqliteConnection,
-) -> Result<crate::models::UserLanguage, diesel::result::Error> {
+) -> crate::models::UserLanguage {
     let users_languages = users_languages::dsl::users_languages
-        .filter(users_languages::user_id.eq(user.id))
+        .filter(users_languages::user_id.eq(user_id))
         .filter(users_languages::language_id.eq(language.id))
         .first::<crate::models::UserLanguage>(conn);
 
     match users_languages {
-        Ok(users_languages) => Ok(users_languages),
+        Ok(users_languages) => users_languages,
         Err(_) => {
             diesel::insert_into(users_languages::dsl::users_languages)
                 .values((
-                    users_languages::user_id.eq(user.id),
+                    users_languages::user_id.eq(user_id),
                     users_languages::language_id.eq(language.id),
                     users_languages::minutes.eq(0),
                 ))
@@ -109,8 +99,9 @@ fn get_or_create_user_languages(
                 .unwrap();
 
             users_languages::dsl::users_languages
-                .find((user.id, language.id))
+                .find((user_id, language.id))
                 .first::<crate::models::UserLanguage>(conn)
+                .unwrap()
         }
     }
 }
