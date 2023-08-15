@@ -1,0 +1,16 @@
+[Unit]
+Description=Langkeeper server
+Wants=network-online.target
+After=network-online.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=root
+WorkingDirectory=/root/langkeeper/
+ExecStart=/root/langkeeper/target/release/langmer
+
+[Install]
+WantedBy=multi-user.target
