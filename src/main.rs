@@ -22,7 +22,7 @@ type DbPool = r2d2::Pool<diesel::r2d2::ConnectionManager<SqliteConnection>>;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    let address = "127.0.0.1";
+    let address = "0.0.0.0";
     let port = 8000;
 
     println!("Starting server...");
