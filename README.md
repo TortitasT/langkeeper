@@ -38,3 +38,23 @@ Run with watch.
 ```bash
 cargo watch -x run
 ```
+
+## Useful commands
+
+Login
+
+```bash
+http --session=./session.json post localhost:8000/users/login email=admin@langmer.es password=secret
+```
+
+Ping a language
+
+```bash
+http --session=./session.json post localhost:8000/languages/ping extension=.c
+```
+
+Get user data
+
+```bash
+http --session=./session.json get localhost:8000/users/me
+```

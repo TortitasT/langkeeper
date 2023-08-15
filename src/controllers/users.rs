@@ -1,14 +1,23 @@
 use actix_session::Session;
 use actix_web::{
+    get, post,
     web::{Data, Json},
     HttpResponse, Responder,
 };
 use garde::Validate;
 
-use crate::{jwt, middlewares::auth::AuthMiddleware, schema::users::dsl::users};
+use crate::{middlewares::auth::AuthMiddleware, schema::users::dsl::users};
 use diesel::prelude::*;
 use diesel::RunQueryDsl;
 
+pub fn init(cfg: &mut actix_web::web::ServiceConfig) {
+    cfg.service(user_controller_list);
+    cfg.service(user_controller_login);
+    cfg.service(user_controller_create);
+    cfg.service(user_controller_show);
+}
+
+#[get("/users")]
 pub async fn user_controller_list(db_pool: Data<crate::DbPool>) -> impl Responder {
     let mut conn = db_pool.get().unwrap();
 
@@ -27,6 +36,7 @@ pub async fn user_controller_list(db_pool: Data<crate::DbPool>) -> impl Responde
     HttpResponse::Ok().json(results)
 }
 
+#[post("/users/login")]
 pub async fn user_controller_login(
     user: Json<crate::resources::LoginUser>,
     db_pool: Data<crate::DbPool>,
@@ -58,6 +68,7 @@ pub async fn user_controller_login(
     }
 }
 
+#[post("/users")]
 pub async fn user_controller_create(
     user: Json<crate::resources::NewUser>,
     db_pool: Data<crate::DbPool>,
@@ -89,6 +100,7 @@ pub async fn user_controller_create(
     }
 }
 
+#[get("/users/me")]
 pub async fn user_controller_show(
     db_pool: Data<crate::DbPool>,
     auth_middleware: AuthMiddleware,
