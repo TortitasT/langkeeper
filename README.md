@@ -58,3 +58,29 @@ Get user data
 ```bash
 http --session=./session.json get localhost:8000/users/me
 ```
+
+## Deploy
+
+Clone
+
+```bash
+git clone https://github.com/tortitast/langkeeper
+```
+
+Build
+
+```bash
+cargo build --release
+```
+
+Copy service
+
+```bash
+cp ./langkeeper.service /etc/systemd/system/
+```
+
+Start service
+
+```bash
+service langkeeper start
+```
