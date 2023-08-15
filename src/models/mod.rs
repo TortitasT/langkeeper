@@ -24,7 +24,9 @@ pub struct Language {
     pub updated_at: chrono::NaiveDateTime,
 }
 
-#[derive(Identifiable, Selectable, Queryable, Associations, Debug)]
+#[derive(
+    Identifiable, Selectable, Insertable, Queryable, Associations, Debug, Serialize, Deserialize,
+)]
 #[diesel(belongs_to(User))]
 #[diesel(belongs_to(Language))]
 #[diesel(table_name = crate::schema::users_languages)]

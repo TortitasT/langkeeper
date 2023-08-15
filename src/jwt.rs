@@ -14,8 +14,7 @@ pub fn generate_auth_jwt(user: &User) -> Result<String, Box<dyn std::error::Erro
 
     let claims = Claims {
         sub: user.id,
-        // exp: Utc::now().timestamp() + 60 * 60 * 24 * 7, // 7 days
-        exp: Utc::now().timestamp() + 1, // 1 second
+        exp: Utc::now().timestamp() + 60 * 60 * 24 * 7, // 7 days
     };
 
     let token = encode(

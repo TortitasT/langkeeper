@@ -10,7 +10,7 @@ mod jwt;
 #[cfg(test)]
 mod test;
 
-use actix_session::{storage::CookieSessionStore, Session, SessionMiddleware};
+use actix_session::{storage::CookieSessionStore, SessionMiddleware};
 use actix_web::{
     cookie::Key,
     web::{self},
@@ -38,12 +38,8 @@ async fn main() -> std::io::Result<()> {
                     .build(),
             )
             .app_data(web::Data::new(pool.clone()))
-            .service(web::scope("/user")
-                    .route("", web::get().to(controllers::users::user_controller_show)))
-            .service(web::scope("/users")
-                    .route("", web::get().to(controllers::users::user_controller_list))
-                    .route("", web::post().to(controllers::users::user_controller_create))
-                    .route("/login", web::post().to(controllers::users::user_controller_login)))
+            .configure(controllers::users::init)
+            .configure(controllers::languages::init)
     })
     .bind((address, port))?
     .run()
