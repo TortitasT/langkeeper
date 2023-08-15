@@ -1,5 +1,6 @@
 use actix_web::web::Json;
 use actix_web::{post, web::Data, HttpResponse, Responder};
+use chrono::TimeZone;
 use serde::{Deserialize, Serialize};
 
 // use crate::models::*;
@@ -23,6 +24,7 @@ pub struct PingResponse {
     pub language_name: String,
     pub language_extension: String,
     pub minutes: i32,
+    pub minutes_since_last_update: i32,
 }
 
 #[post("/languages/ping")]
@@ -42,29 +44,42 @@ pub async fn language_controller_ping(
     let users_languages =
         get_or_create_user_languages(&auth_middleware.user_id, &language, &mut *conn);
 
-    diesel::update(&users_languages)
-        .set(users_languages::minutes.eq(users_languages.minutes + 1))
-        .execute(&mut *conn)
+    let last_update = chrono::Utc
+        .from_local_datetime(&users_languages.updated_at)
         .unwrap();
 
-    let response = PingResponse {
+    let minutes_since_last_update = chrono::Utc::now()
+        .signed_duration_since(last_update)
+        .num_minutes();
+
+    match minutes_since_last_update {
+        i64::MIN..=0 => {}
+        1..=5 => {
+            diesel::update(&users_languages)
+                .set((
+                    users_languages::minutes
+                        .eq(users_languages.minutes + minutes_since_last_update as i32),
+                    users_languages::updated_at.eq(chrono::Utc::now().naive_utc()),
+                ))
+                .execute(&mut *conn)
+                .unwrap();
+        }
+        _ => {
+            diesel::update(&users_languages)
+                .set(users_languages::updated_at.eq(chrono::Utc::now().naive_utc()))
+                .execute(&mut *conn)
+                .unwrap();
+        }
+    }
+
+    return HttpResponse::Ok().json(PingResponse {
         user_id: auth_middleware.user_id,
         language_id: language.id,
         language_name: language.name,
         language_extension: language.extension,
-        minutes: users_languages.minutes + 1,
-    };
-
-    HttpResponse::Ok().json(response)
-}
-
-fn get_user_by_id(
-    user_id: i32,
-    conn: &mut diesel::SqliteConnection,
-) -> Result<crate::models::User, diesel::result::Error> {
-    users::dsl::users
-        .find(user_id)
-        .first::<crate::models::User>(conn)
+        minutes: users_languages.minutes,
+        minutes_since_last_update: minutes_since_last_update as i32,
+    });
 }
 
 fn get_language_by_extension(
