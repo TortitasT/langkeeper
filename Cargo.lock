@@ -1121,6 +1121,8 @@ dependencies = [
 name = "langkeeper"
 version = "0.1.0"
 dependencies = [
+ "actix-http",
+ "actix-service",
  "actix-session",
  "actix-web",
  "bcrypt",

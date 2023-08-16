@@ -7,14 +7,18 @@ pub mod schema;
 mod db;
 mod jwt;
 
+#[macro_use]
+extern crate diesel_migrations;
+
 #[cfg(test)]
-mod test;
+mod tests;
 
 use std::env;
 
 use actix_session::{storage::CookieSessionStore, SessionMiddleware};
 use actix_web::{
     cookie::Key,
+    dev::{ServiceFactory, ServiceRequest, ServiceResponse},
     web::{self},
     App, HttpServer,
 };
@@ -49,19 +53,31 @@ async fn main() -> std::io::Result<()> {
 
     let pool = db::get_connection_pool(None);
 
-    HttpServer::new(move || {
-        App::new()
-            .wrap(
-                SessionMiddleware::builder(CookieSessionStore::default(), Key::from(&[0; 64]))
-                    .cookie_secure(false) // TODO: Remove this in production so only HTTPS is allowed
-                    .build(),
-            )
-            .app_data(web::Data::new(pool.clone()))
-            .service(index)
-            .configure(controllers::users::init)
-            .configure(controllers::languages::init)
-    })
-    .bind((address, port))?
-    .run()
-    .await
+    HttpServer::new(move || generate_app(pool.clone()))
+        .bind((address, port))?
+        .run()
+        .await
+}
+
+pub fn generate_app(
+    pool: DbPool,
+) -> App<
+    impl ServiceFactory<
+        ServiceRequest,
+        Config = (),
+        Response = ServiceResponse,
+        Error = actix_web::Error,
+        InitError = (),
+    >,
+> {
+    App::new()
+        .wrap(
+            SessionMiddleware::builder(CookieSessionStore::default(), Key::from(&[0; 64]))
+                .cookie_secure(false) // TODO: Remove this in production so only HTTPS is allowed
+                .build(),
+        )
+        .app_data(web::Data::new(pool.clone()))
+        .service(index)
+        .configure(controllers::users::init)
+        .configure(controllers::languages::init)
 }

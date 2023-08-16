@@ -37,3 +37,17 @@ fn get_database_url() -> String {
         }
     }
 }
+
+pub fn run_migrations(pool: &r2d2::Pool<ConnectionManager<SqliteConnection>>) {
+    let conn = pool.get().unwrap();
+
+    let migrations = diesel_migrations::embed_migrations!("migrations");
+
+    match diesel_migrations::run_pending_migrations(&conn, &migrations) {
+        Ok(_) => (),
+        Err(e) => {
+            println!("Failed to run migrations: {}", e);
+            exit(1);
+        }
+    }
+}
