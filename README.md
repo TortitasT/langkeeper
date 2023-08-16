@@ -84,3 +84,11 @@ Start service
 ```bash
 service langkeeper start
 ```
+
+## Tests
+
+Run with logs and in single thread so database lock is ok.
+
+```bash
+cargo test -- --nocapture --test-threads=1
+```

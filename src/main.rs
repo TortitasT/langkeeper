@@ -53,14 +53,14 @@ async fn main() -> std::io::Result<()> {
 
     let pool = db::get_connection_pool(None);
 
-    HttpServer::new(move || generate_app(pool.clone()))
+    HttpServer::new(move || generate_app(&pool))
         .bind((address, port))?
         .run()
         .await
 }
 
 pub fn generate_app(
-    pool: DbPool,
+    pool: &DbPool,
 ) -> App<
     impl ServiceFactory<
         ServiceRequest,

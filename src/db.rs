@@ -8,7 +8,7 @@ pub fn get_connection_pool(
 ) -> r2d2::Pool<ConnectionManager<SqliteConnection>> {
     let manager = get_connection_manager(path);
 
-    match r2d2::Pool::builder().build(manager) {
+    match r2d2::Pool::builder().max_size(1).build(manager) {
         Ok(pool) => pool,
         Err(e) => {
             println!("Failed to create pool: {}", e);
@@ -33,20 +33,6 @@ fn get_database_url() -> String {
         Ok(url) => url,
         Err(_) => {
             println!("DATABASE_URL not set, remember to create a `.env` file and run `diesel migration run`");
-            exit(1);
-        }
-    }
-}
-
-pub fn run_migrations(pool: &r2d2::Pool<ConnectionManager<SqliteConnection>>) {
-    let conn = pool.get().unwrap();
-
-    let migrations = diesel_migrations::embed_migrations!("migrations");
-
-    match diesel_migrations::run_pending_migrations(&conn, &migrations) {
-        Ok(_) => (),
-        Err(e) => {
-            println!("Failed to run migrations: {}", e);
             exit(1);
         }
     }
