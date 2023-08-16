@@ -33,7 +33,10 @@ async fn main() -> std::io::Result<()> {
     let port = match env::args().nth(1) {
         Some(port) => match port.parse::<u16>() {
             Ok(port) => port,
-            Err(_) => panic!("Port must be a number"),
+            Err(_) => {
+                println!("Invalid port provided, using default port 8000");
+                8000
+            }
         },
         None => {
             println!("No port provided, using default port 8000");

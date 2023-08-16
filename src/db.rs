@@ -1,4 +1,4 @@
-use std::env;
+use std::{env, process::exit};
 
 use diesel::{r2d2::ConnectionManager, SqliteConnection};
 use dotenvy::dotenv;
@@ -8,9 +8,13 @@ pub fn get_connection_pool(
 ) -> r2d2::Pool<ConnectionManager<SqliteConnection>> {
     let manager = get_connection_manager(path);
 
-    r2d2::Pool::builder()
-        .build(manager)
-        .expect("database URL should be valid path to SQLite DB file")
+    match r2d2::Pool::builder().build(manager) {
+        Ok(pool) => pool,
+        Err(e) => {
+            println!("Failed to create pool: {}", e);
+            exit(1);
+        }
+    }
 }
 
 fn get_connection_manager(path: Option<String>) -> ConnectionManager<SqliteConnection> {
@@ -25,5 +29,11 @@ fn get_connection_manager(path: Option<String>) -> ConnectionManager<SqliteConne
 }
 
 fn get_database_url() -> String {
-    env::var("DATABASE_URL").expect("DATABASE_URL must be set")
+    match env::var("DATABASE_URL") {
+        Ok(url) => url,
+        Err(_) => {
+            println!("DATABASE_URL not set, remember to create a `.env` file and run `diesel migration run`");
+            exit(1);
+        }
+    }
 }

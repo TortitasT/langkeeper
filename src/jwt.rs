@@ -9,8 +9,18 @@ pub struct Claims {
     exp: i64,
 }
 
+fn get_jwt_secret() -> String {
+    match std::env::var("JWT_SECRET") {
+        Ok(secret) => secret,
+        Err(_) => {
+            println!("JWT_SECRET not set, remember to create a `.env` file and run `diesel migration run`");
+            std::process::exit(1);
+        }
+    }
+}
+
 pub fn generate_auth_jwt(user: &User) -> Result<String, Box<dyn std::error::Error>> {
-    let secret = std::env::var("JWT_SECRET").expect("JWT_SECRET must be set");
+    let secret = get_jwt_secret();
 
     let claims = Claims {
         sub: user.id,
@@ -27,7 +37,7 @@ pub fn generate_auth_jwt(user: &User) -> Result<String, Box<dyn std::error::Erro
 }
 
 pub fn decode_auth_jwt(token: &str) -> Result<Claims, Box<dyn std::error::Error>> {
-    let secret = std::env::var("JWT_SECRET").expect("JWT_SECRET must be set");
+    let secret = get_jwt_secret();
 
     let decoded = jsonwebtoken::decode::<Claims>(
         token,

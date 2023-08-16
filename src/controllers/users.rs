@@ -21,7 +21,7 @@ pub fn init(cfg: &mut actix_web::web::ServiceConfig) {
 pub async fn user_controller_list(db_pool: Data<crate::DbPool>) -> impl Responder {
     let mut conn = db_pool.get().unwrap();
 
-    let results = users
+    let results = match users
         .select((
             crate::schema::users::id,
             crate::schema::users::name,
@@ -31,7 +31,10 @@ pub async fn user_controller_list(db_pool: Data<crate::DbPool>) -> impl Responde
         )) // TODO: is there a way to avoid doing this? I just want the fields from the struct
         .limit(100)
         .load::<crate::resources::ShowUser>(&mut *conn)
-        .expect("Error loading users");
+    {
+        Ok(found_users) => found_users,
+        Err(_) => return HttpResponse::InternalServerError().body("Something went wrong"),
+    };
 
     HttpResponse::Ok().json(results)
 }
