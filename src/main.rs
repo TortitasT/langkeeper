@@ -22,6 +22,11 @@ use diesel::SqliteConnection;
 
 type DbPool = r2d2::Pool<diesel::r2d2::ConnectionManager<SqliteConnection>>;
 
+#[actix_web::get("/")]
+async fn index() -> &'static str {
+    "Hello world!"
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     let address = "0.0.0.0";
@@ -49,6 +54,7 @@ async fn main() -> std::io::Result<()> {
                     .build(),
             )
             .app_data(web::Data::new(pool.clone()))
+            .service(index)
             .configure(controllers::users::init)
             .configure(controllers::languages::init)
     })
