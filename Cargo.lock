@@ -1118,7 +1118,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "langmer"
+name = "langkeeper"
 version = "0.1.0"
 dependencies = [
  "actix-session",
