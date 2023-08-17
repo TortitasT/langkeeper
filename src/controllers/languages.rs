@@ -12,12 +12,12 @@ pub fn init(cfg: &mut actix_web::web::ServiceConfig) {
     cfg.service(language_controller_ping);
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 pub struct PingRequest {
     pub extension: String,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 pub struct PingResponse {
     pub user_id: i32,
     pub language_id: i32,

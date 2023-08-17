@@ -17,8 +17,7 @@ garde = "0.13.0"
 r2d2 = "0.8.10"
 jsonwebtoken = "8"
 bcrypt = "0.15.0"
-actix-session = { version = "0.7.2", features = ["cookie-session"] }
-env_logger = "0.10.0"
-log = "0.4.19"
-diesel_migrations = "2.1.0"
 futures-util = "0.3.28"
+actix-service = "2.0.2"
+actix-http = "3.3.1"
+actix-session = { version = "0.7.2", features = ["cookie-session"] }

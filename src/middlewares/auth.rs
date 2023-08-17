@@ -13,6 +13,7 @@ impl FromRequest for AuthMiddleware {
 
     fn from_request(req: &actix_web::HttpRequest, _: &mut actix_web::dev::Payload) -> Self::Future {
         let session = req.get_session();
+
         let token = match session.get::<String>("token") {
             Ok(token) => match token {
                 Some(token) => token,
