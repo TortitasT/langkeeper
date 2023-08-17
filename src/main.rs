@@ -7,9 +7,6 @@ pub mod schema;
 mod db;
 mod jwt;
 
-#[macro_use]
-extern crate diesel_migrations;
-
 #[cfg(test)]
 mod tests;
 

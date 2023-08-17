@@ -1,11 +1,10 @@
 use crate::{
     controllers::languages::{PingRequest, PingResponse},
-    resources::ShowUser,
     tests::init_service,
     DbPool,
 };
 
-use actix_http::{header::Header, Request};
+use actix_http::{Request};
 use actix_web::{cookie::Cookie, dev::ServiceResponse, http::StatusCode, test};
 use diesel::RunQueryDsl;
 

@@ -1,6 +1,5 @@
 use crate::{resources::ShowUser, tests::init_service};
 
-use actix_http::header::Header;
 use actix_web::{cookie::Cookie, http::StatusCode, test};
 use diesel::RunQueryDsl;
 
