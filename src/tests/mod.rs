@@ -1,5 +1,7 @@
 mod users;
 
+use std::process::exit;
+
 use actix_http::Request;
 use actix_service::Service;
 use actix_web::{dev::ServiceResponse, http::StatusCode, test};
@@ -10,7 +12,17 @@ use crate::{generate_app, DbPool};
 async fn run_migrations(_pool: &DbPool) {
     // let conn = _pool.get().unwrap();
     //
-    // TODO: handle manually for now
+    // TODO: handle via command for now
+    match std::process::Command::new("diesel")
+        .args(&["migration", "run", "--database-url", "sqlite://test.sqlite"])
+        .output()
+    {
+        Ok(_) => (),
+        Err(e) => {
+            println!("Error running migrations: {}", e);
+            exit(1);
+        }
+    }
 }
 
 async fn clear_database(pool: &DbPool) {
