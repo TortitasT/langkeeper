@@ -54,7 +54,7 @@ pub async fn language_controller_ping(
 
     match minutes_since_last_update {
         i64::MIN..=0 => {}
-        1..=5 => {
+        1..=15 => {
             diesel::update(&users_languages)
                 .set((
                     users_languages::minutes
