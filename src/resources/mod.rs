@@ -35,3 +35,11 @@ pub struct ShowUser {
     pub created_at: chrono::NaiveDateTime,
     pub updated_at: chrono::NaiveDateTime,
 }
+
+#[derive(Insertable, Deserialize, Serialize)]
+#[diesel(table_name = crate::schema::languages)]
+#[diesel(check_for_backend(diesel::sqlite::Sqlite))]
+pub struct NewLanguage {
+    pub name: String,
+    pub extension: String,
+}

@@ -1,12 +1,7 @@
-use crate::tests::init_service;
+use crate::{resources::ShowUser, tests::init_service};
 
 use actix_http::header::Header;
-use actix_web::{
-    cookie::{Cookie, CookieBuilder},
-    http::StatusCode,
-    test,
-};
-use bcrypt::bcrypt;
+use actix_web::{cookie::Cookie, http::StatusCode, test};
 use diesel::RunQueryDsl;
 
 #[actix_web::test]
@@ -45,7 +40,6 @@ async fn test_get_all_users_when_one_user() {
 async fn test_login() {
     let (app, pool) = init_service().await;
 
-    // Create user
     diesel::insert_into(crate::schema::users::table)
         .values(crate::resources::NewUser {
             name: "test".to_owned(),
@@ -55,7 +49,6 @@ async fn test_login() {
         .execute(&mut pool.get().unwrap())
         .unwrap();
 
-    // Login
     let req = test::TestRequest::post()
         .uri("/users/login")
         .set_json(crate::resources::LoginUser {
@@ -67,7 +60,7 @@ async fn test_login() {
     assert_eq!(res.status(), StatusCode::OK);
 
     let session_id = res.headers().get("set-cookie").unwrap();
-    let session_id_cookie = Cookie::parse(session_id.to_str().unwrap()).unwrap();
+    let session_id_cookie = Cookie::parse_encoded(session_id.to_str().unwrap()).unwrap();
 
     let res = test::TestRequest::get()
         .uri("/users/me")
@@ -75,7 +68,9 @@ async fn test_login() {
         .send_request(&app)
         .await;
 
-    println!("\n{:?}", res.into_body());
+    assert_eq!(res.status(), StatusCode::OK);
 
-    // assert_eq!(res.status(), StatusCode::OK);
+    let body: ShowUser = test::read_body_json(res).await;
+    assert_eq!(body.name, "test");
+    assert_eq!(body.email, "test@test.test");
 }

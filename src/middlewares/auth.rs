@@ -1,5 +1,3 @@
-use std::fmt::format;
-
 use actix_session::SessionExt;
 use actix_web::FromRequest;
 
@@ -14,14 +12,7 @@ impl FromRequest for AuthMiddleware {
     type Future = futures::future::Ready<Result<Self, Self::Error>>;
 
     fn from_request(req: &actix_web::HttpRequest, _: &mut actix_web::dev::Payload) -> Self::Future {
-        // let debug_response = format!("{:?}", req.cookies().unwrap());
-        // return futures::future::err(actix_web::error::ErrorUnauthorized(debug_response));
-
         let session = req.get_session();
-
-        return futures::future::err(actix_web::error::ErrorUnauthorized(
-            session.get::<String>("token").unwrap(),
-        ));
 
         let token = match session.get::<String>("token") {
             Ok(token) => match token {

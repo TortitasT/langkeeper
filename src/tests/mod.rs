@@ -1,4 +1,4 @@
-mod users;
+mod controllers;
 
 use std::process::exit;
 
