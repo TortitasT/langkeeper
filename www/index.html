@@ -3,52 +3,25 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Langkeeper</title>
+    <title>Login - Langkeeper</title>
     <link rel="stylesheet" href="style.css" />
     <script src="https://unpkg.com/htmx.org@1.9.4"></script>
   </head>
   <body>
-    <h1>Langkeeper</h1>
+    <h1>Login</h1>
 
-    <section>
-      <h2>User Management</h2>
+    <form hx-post="/htmx/users/login">
+      <label>
+        <span>Email</span>
+        <input type="text" name="email" />
+      </label>
 
-      <section>
-        <button hx-get="/users/me" hx-swap="outerHTML">User Info</button>
-      </section>
+      <label>
+        <span>Password</span>
+        <input type="password" name="password" />
+      </label>
 
-      <form hx-post="/htmx/users/login">
-        <label>
-          <span>Email</span>
-          <input type="text" name="email" />
-        </label>
-
-        <label>
-          <span>Password</span>
-          <input type="password" name="password" />
-        </label>
-
-        <button>Login</button>
-      </form>
-    </section>
-
-    <section>
-      <h2>Language Report</h2>
-
-      <table>
-        <thead>
-          <tr>
-            <th>Language</th>
-            <th>Extension</th>
-            <th>Minutes</th>
-          </tr>
-        </thead>
-        <tbody
-          hx-get="/htmx/languages/stats"
-          hx-trigger="load"
-          hx-swap="outerHTML"
-        ></tbody>
-      </table>
-    </section>
+      <button>Login</button>
+    </form>
   </body>
 </html>

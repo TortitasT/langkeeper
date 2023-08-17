@@ -99,7 +99,9 @@ pub async fn user_controller_login_htmx(
                 let jwt = crate::jwt::generate_auth_jwt(&result_user).unwrap();
                 session.insert("token", jwt).unwrap();
 
-                HttpResponse::Ok().body("User logged in")
+                HttpResponse::Ok()
+                    .insert_header(("HX-Redirect", "/dashboard.html"))
+                    .body("User logged in")
             } else {
                 HttpResponse::Unauthorized().body("Invalid credentials")
             }
@@ -148,8 +150,15 @@ pub async fn user_controller_show(
     let mut conn = db_pool.get().unwrap();
 
     let user = users
+        .select((
+            crate::schema::users::id,
+            crate::schema::users::name,
+            crate::schema::users::email,
+            crate::schema::users::created_at,
+            crate::schema::users::updated_at,
+        ))
         .find(auth_middleware.user_id)
-        .first::<crate::models::User>(&mut *conn);
+        .first::<ShowUser>(&mut *conn);
 
     match user {
         Ok(user) => HttpResponse::Ok().json(user),
