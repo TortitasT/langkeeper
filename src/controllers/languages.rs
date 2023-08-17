@@ -1,6 +1,7 @@
 use actix_web::web::Json;
 use actix_web::{get, post, web::Data, HttpResponse, Responder};
 use chrono::TimeZone;
+use typed_html::{html, text};
 
 use crate::resources::languages::{LanguageStats, PingRequest, PingResponse};
 use crate::schema::*;
@@ -10,6 +11,7 @@ use diesel::prelude::*;
 pub fn init(cfg: &mut actix_web::web::ServiceConfig) {
     cfg.service(language_controller_ping);
     cfg.service(language_controller_stats);
+    cfg.service(language_controller_stats_htmx);
 }
 
 #[post("/languages/ping")]
@@ -96,6 +98,49 @@ pub async fn language_controller_stats(
     }
 
     return HttpResponse::Ok().json(stats);
+}
+
+#[get("/htmx/languages/stats")]
+pub async fn language_controller_stats_htmx(
+    db_pool: Data<DbPool>,
+    auth_middleware: AuthMiddleware,
+) -> impl Responder {
+    let mut conn = db_pool.get().unwrap();
+
+    let users_languages = users_languages::dsl::users_languages
+        .filter(users_languages::user_id.eq(auth_middleware.user_id))
+        .load::<crate::models::UserLanguage>(&mut *conn)
+        .unwrap();
+
+    let mut stats = Vec::new();
+
+    for user_language in users_languages {
+        let language = languages::dsl::languages
+            .find(user_language.language_id)
+            .first::<crate::models::Language>(&mut *conn)
+            .unwrap();
+
+        stats.push(LanguageStats {
+            language_id: language.id,
+            language_name: language.name,
+            language_extension: language.extension,
+            minutes: user_language.minutes,
+        });
+    }
+
+    let html: typed_html::dom::DOMTree<String> = html!(
+        <tbody>
+            { stats.iter().map(|stat| html!(
+                <tr>
+                    <td>{ text!("{}", stat.language_name) }</td>
+                    <td>{ text!("{}", stat.language_extension) }</td>
+                    <td>{ text!("{}", stat.minutes) }</td>
+                </tr>
+            )) }
+        </tbody>
+    );
+
+    return HttpResponse::Ok().body(html.to_string());
 }
 
 fn get_language_by_extension(

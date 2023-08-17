@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Langkeeper</title>
+    <script src="https://unpkg.com/htmx.org@1.9.4"></script>
+  </head>
+  <body>
+    <section>
+      <h2>User Management</h2>
+
+      <section>
+        <button hx-get="/users/me" hx-swap="outerHTML">Click Me</button>
+      </section>
+
+      <form hx-post="/htmx/users/login">
+        <input type="text" name="email" />
+        <input type="password" name="password" />
+
+        <button>Login</button>
+      </form>
+    </section>
+
+    <section>
+      <h2>Language Report</h2>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Language</th>
+            <th>Extension</th>
+            <th>Minutes</th>
+          </tr>
+        </thead>
+        <tbody
+          hx-get="/htmx/languages/stats"
+          hx-trigger="load"
+          hx-swap="outerHTML"
+        ></tbody>
+      </table>
+    </section>
+  </body>
+</html>

@@ -37,7 +37,7 @@ Run with watch.
 
 ```bash
 cargo install cargo-watch
-cargo watch -x run
+cargo watch -x "run serve"
 ```
 
 ## Useful commands

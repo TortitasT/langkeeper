@@ -1,7 +1,7 @@
 use actix_session::Session;
 use actix_web::{
     get, post,
-    web::{Data, Json},
+    web::{Data, Form, Json},
     HttpResponse, Responder,
 };
 use garde::Validate;
@@ -17,6 +17,7 @@ use diesel::RunQueryDsl;
 pub fn init(cfg: &mut actix_web::web::ServiceConfig) {
     cfg.service(user_controller_list);
     cfg.service(user_controller_login);
+    cfg.service(user_controller_login_htmx);
     cfg.service(user_controller_create);
     cfg.service(user_controller_show);
 }
@@ -46,6 +47,38 @@ pub async fn user_controller_list(db_pool: Data<crate::DbPool>) -> impl Responde
 #[post("/users/login")]
 pub async fn user_controller_login(
     user: Json<LoginUser>,
+    db_pool: Data<crate::DbPool>,
+    session: Session,
+) -> impl Responder {
+    let mut conn = db_pool.get().unwrap();
+
+    let result = users
+        .filter(crate::schema::users::email.eq(&user.email))
+        .first::<crate::models::User>(&mut *conn);
+
+    let result_user = match result {
+        Ok(user) => user,
+        Err(_) => return HttpResponse::Unauthorized().body("Invalid credentials"),
+    };
+
+    match bcrypt::verify(&user.password, &result_user.password) {
+        Ok(valid) => {
+            if valid {
+                let jwt = crate::jwt::generate_auth_jwt(&result_user).unwrap();
+                session.insert("token", jwt).unwrap();
+
+                HttpResponse::Ok().body("User logged in")
+            } else {
+                HttpResponse::Unauthorized().body("Invalid credentials")
+            }
+        }
+        Err(_) => HttpResponse::InternalServerError().body("Something went wrong"),
+    }
+}
+
+#[post("/htmx/users/login")]
+pub async fn user_controller_login_htmx(
+    user: Form<LoginUser>,
     db_pool: Data<crate::DbPool>,
     session: Session,
 ) -> impl Responder {

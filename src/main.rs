@@ -1,3 +1,5 @@
+#![recursion_limit = "256"]
+
 pub mod controllers;
 pub mod middlewares;
 pub mod models;
@@ -11,6 +13,7 @@ mod jwt;
 #[cfg(test)]
 mod tests;
 
+use actix_files::Files;
 use std::{env, process::exit};
 
 use actix_session::{storage::CookieSessionStore, SessionMiddleware};
@@ -24,9 +27,9 @@ use diesel::SqliteConnection;
 
 type DbPool = r2d2::Pool<diesel::r2d2::ConnectionManager<SqliteConnection>>;
 
-#[actix_web::get("/")]
-async fn index() -> &'static str {
-    "Hello world!"
+#[actix_web::get("/checkhealth")]
+async fn checkhealth() -> &'static str {
+    "Hello from langkeeper!! 🦀"
 }
 
 #[actix_web::main]
@@ -119,7 +122,12 @@ pub fn generate_app(
                 .build(),
         )
         .app_data(web::Data::new(pool.clone()))
-        .service(index)
+        .service(checkhealth)
         .configure(controllers::users::init)
         .configure(controllers::languages::init)
+        .service(
+            Files::new("/", "./www")
+                .index_file("index.html")
+                .show_files_listing(),
+        )
 }

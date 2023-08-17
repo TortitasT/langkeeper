@@ -21,3 +21,6 @@ futures-util = "0.3.28"
 actix-service = "2.0.2"
 actix-http = "3.3.1"
 actix-session = { version = "0.7.2", features = ["cookie-session"] }
+actix-files = "0.6.2"
+# typed-html = "0.2.2"
+typed-html = { git = "https://github.com/bodil/typed-html", rev = "4c13ecca" }
