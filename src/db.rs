@@ -8,7 +8,7 @@ pub fn get_connection_pool(
 ) -> r2d2::Pool<ConnectionManager<SqliteConnection>> {
     let manager = get_connection_manager(path);
 
-    match r2d2::Pool::builder().max_size(1).build(manager) {
+    match r2d2::Pool::builder().build(manager) {
         Ok(pool) => pool,
         Err(e) => {
             println!("Failed to create pool: {}", e);
