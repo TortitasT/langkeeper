@@ -4,19 +4,29 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Langkeeper</title>
+    <link rel="stylesheet" href="style.css" />
     <script src="https://unpkg.com/htmx.org@1.9.4"></script>
   </head>
   <body>
+    <h1>Langkeeper</h1>
+
     <section>
       <h2>User Management</h2>
 
       <section>
-        <button hx-get="/users/me" hx-swap="outerHTML">Click Me</button>
+        <button hx-get="/users/me" hx-swap="outerHTML">User Info</button>
       </section>
 
       <form hx-post="/htmx/users/login">
-        <input type="text" name="email" />
-        <input type="password" name="password" />
+        <label>
+          <span>Email</span>
+          <input type="text" name="email" />
+        </label>
+
+        <label>
+          <span>Password</span>
+          <input type="password" name="password" />
+        </label>
 
         <button>Login</button>
       </form>
