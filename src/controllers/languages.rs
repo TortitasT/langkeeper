@@ -1,30 +1,15 @@
 use actix_web::web::Json;
-use actix_web::{post, web::Data, HttpResponse, Responder};
+use actix_web::{get, post, web::Data, HttpResponse, Responder};
 use chrono::TimeZone;
-use serde::{Deserialize, Serialize};
 
-// use crate::models::*;
+use crate::resources::languages::{LanguageStats, PingRequest, PingResponse};
 use crate::schema::*;
 use crate::{middlewares::auth::AuthMiddleware, DbPool};
 use diesel::prelude::*;
 
 pub fn init(cfg: &mut actix_web::web::ServiceConfig) {
     cfg.service(language_controller_ping);
-}
-
-#[derive(Deserialize, Serialize)]
-pub struct PingRequest {
-    pub extension: String,
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct PingResponse {
-    pub user_id: i32,
-    pub language_id: i32,
-    pub language_name: String,
-    pub language_extension: String,
-    pub minutes: i32,
-    pub minutes_since_last_update: i32,
+    cfg.service(language_controller_stats);
 }
 
 #[post("/languages/ping")]
@@ -80,6 +65,37 @@ pub async fn language_controller_ping(
         minutes: users_languages.minutes,
         minutes_since_last_update: minutes_since_last_update as i32,
     });
+}
+
+#[get("/languages/stats")]
+pub async fn language_controller_stats(
+    db_pool: Data<DbPool>,
+    auth_middleware: AuthMiddleware,
+) -> impl Responder {
+    let mut conn = db_pool.get().unwrap();
+
+    let users_languages = users_languages::dsl::users_languages
+        .filter(users_languages::user_id.eq(auth_middleware.user_id))
+        .load::<crate::models::UserLanguage>(&mut *conn)
+        .unwrap();
+
+    let mut stats = Vec::new();
+
+    for user_language in users_languages {
+        let language = languages::dsl::languages
+            .find(user_language.language_id)
+            .first::<crate::models::Language>(&mut *conn)
+            .unwrap();
+
+        stats.push(LanguageStats {
+            language_id: language.id,
+            language_name: language.name,
+            language_extension: language.extension,
+            minutes: user_language.minutes,
+        });
+    }
+
+    return HttpResponse::Ok().json(stats);
 }
 
 fn get_language_by_extension(

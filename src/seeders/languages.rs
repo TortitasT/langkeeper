@@ -1,4 +1,4 @@
-use crate::{resources::NewLanguage, DbPool};
+use crate::{resources::languages::NewLanguage, DbPool};
 use diesel::RunQueryDsl;
 
 pub fn seed(pool: &DbPool) {

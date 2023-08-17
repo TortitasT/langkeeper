@@ -6,7 +6,11 @@ use actix_web::{
 };
 use garde::Validate;
 
-use crate::{middlewares::auth::AuthMiddleware, schema::users::dsl::users};
+use crate::{
+    middlewares::auth::AuthMiddleware,
+    resources::users::{LoginUser, NewUser, ShowUser},
+    schema::users::dsl::users,
+};
 use diesel::prelude::*;
 use diesel::RunQueryDsl;
 
@@ -30,7 +34,7 @@ pub async fn user_controller_list(db_pool: Data<crate::DbPool>) -> impl Responde
             crate::schema::users::updated_at,
         )) // TODO: is there a way to avoid doing this? I just want the fields from the struct
         .limit(100)
-        .load::<crate::resources::ShowUser>(&mut *conn)
+        .load::<ShowUser>(&mut *conn)
     {
         Ok(found_users) => found_users,
         Err(_) => return HttpResponse::InternalServerError().body("Something went wrong"),
@@ -41,7 +45,7 @@ pub async fn user_controller_list(db_pool: Data<crate::DbPool>) -> impl Responde
 
 #[post("/users/login")]
 pub async fn user_controller_login(
-    user: Json<crate::resources::LoginUser>,
+    user: Json<LoginUser>,
     db_pool: Data<crate::DbPool>,
     session: Session,
 ) -> impl Responder {
@@ -73,12 +77,12 @@ pub async fn user_controller_login(
 
 #[post("/users")]
 pub async fn user_controller_create(
-    user: Json<crate::resources::NewUser>,
+    user: Json<NewUser>,
     db_pool: Data<crate::DbPool>,
 ) -> impl Responder {
     let mut conn = db_pool.get().unwrap();
 
-    let mut new_user = crate::resources::NewUser {
+    let mut new_user = NewUser {
         name: user.name.clone(),
         email: user.email.clone(),
         password: user.password.clone(),

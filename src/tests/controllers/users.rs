@@ -1,4 +1,7 @@
-use crate::{resources::ShowUser, tests::init_service};
+use crate::{
+    resources::users::{LoginUser, NewUser, ShowUser},
+    tests::init_service,
+};
 
 use actix_web::{cookie::Cookie, http::StatusCode, test};
 use diesel::RunQueryDsl;
@@ -20,7 +23,7 @@ async fn test_get_all_users_when_one_user() {
     let (app, pool) = init_service().await;
 
     diesel::insert_into(crate::schema::users::table)
-        .values(crate::resources::NewUser {
+        .values(NewUser {
             name: "test".to_owned(),
             email: "test@test.test".to_owned(),
             password: "test".to_owned(),
@@ -30,7 +33,7 @@ async fn test_get_all_users_when_one_user() {
 
     let req = test::TestRequest::with_uri("/users").to_request();
 
-    let res: Vec<crate::resources::ShowUser> = test::call_and_read_body_json(&app, req).await;
+    let res: Vec<ShowUser> = test::call_and_read_body_json(&app, req).await;
 
     assert_eq!(res.len(), 1);
 }
@@ -40,7 +43,7 @@ async fn test_login() {
     let (app, pool) = init_service().await;
 
     diesel::insert_into(crate::schema::users::table)
-        .values(crate::resources::NewUser {
+        .values(NewUser {
             name: "test".to_owned(),
             email: "test@test.test".to_owned(),
             password: bcrypt::hash("secret".to_owned(), bcrypt::DEFAULT_COST).unwrap(),
@@ -50,7 +53,7 @@ async fn test_login() {
 
     let req = test::TestRequest::post()
         .uri("/users/login")
-        .set_json(crate::resources::LoginUser {
+        .set_json(LoginUser {
             email: "test@test.test".to_owned(),
             password: "secret".to_owned(),
         })

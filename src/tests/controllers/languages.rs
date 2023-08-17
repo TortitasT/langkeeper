@@ -1,10 +1,13 @@
 use crate::{
-    controllers::languages::{PingRequest, PingResponse},
+    resources::{
+        languages::{NewLanguage, PingRequest, PingResponse},
+        users::{LoginUser, NewUser},
+    },
     tests::init_service,
     DbPool,
 };
 
-use actix_http::{Request};
+use actix_http::Request;
 use actix_web::{cookie::Cookie, dev::ServiceResponse, http::StatusCode, test};
 use diesel::RunQueryDsl;
 
@@ -13,7 +16,7 @@ async fn get_session_cookie<'a>(
     pool: &DbPool,
 ) -> Cookie<'a> {
     diesel::insert_into(crate::schema::users::table)
-        .values(crate::resources::NewUser {
+        .values(NewUser {
             name: "test".to_owned(),
             email: "test@test.test".to_owned(),
             password: bcrypt::hash("secret".to_owned(), bcrypt::DEFAULT_COST).unwrap(),
@@ -23,7 +26,7 @@ async fn get_session_cookie<'a>(
 
     let req = test::TestRequest::post()
         .uri("/users/login")
-        .set_json(crate::resources::LoginUser {
+        .set_json(LoginUser {
             email: "test@test.test".to_owned(),
             password: "secret".to_owned(),
         })
@@ -43,7 +46,7 @@ async fn test_ping_languages() {
     let session_cookie = get_session_cookie(&app, &pool).await;
 
     diesel::insert_into(crate::schema::languages::table)
-        .values(crate::resources::NewLanguage {
+        .values(NewLanguage {
             name: "Rust".to_owned(),
             extension: "rs".to_owned(),
         })
