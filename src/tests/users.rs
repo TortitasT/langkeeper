@@ -45,6 +45,7 @@ async fn test_get_all_users_when_one_user() {
 async fn test_login() {
     let (app, pool) = init_service().await;
 
+    // Create user
     diesel::insert_into(crate::schema::users::table)
         .values(crate::resources::NewUser {
             name: "test".to_owned(),
@@ -54,6 +55,7 @@ async fn test_login() {
         .execute(&mut pool.get().unwrap())
         .unwrap();
 
+    // Login
     let req = test::TestRequest::post()
         .uri("/users/login")
         .set_json(crate::resources::LoginUser {
@@ -62,22 +64,18 @@ async fn test_login() {
         })
         .to_request();
     let res = test::call_service(&app, req).await;
-
     assert_eq!(res.status(), StatusCode::OK);
 
     let session_id = res.headers().get("set-cookie").unwrap();
     let session_id_cookie = Cookie::parse(session_id.to_str().unwrap()).unwrap();
 
-    println!("{:?}", session_id_cookie);
-
-    let req = test::TestRequest::get()
+    let res = test::TestRequest::get()
         .uri("/users/me")
-        // .append_header(("cookie", session_id.to_str().unwrap()))
         .cookie(session_id_cookie)
-        .to_request();
-    let res = test::call_service(&app, req).await;
+        .send_request(&app)
+        .await;
 
-    println!("{:?}", res.into_body());
+    println!("\n{:?}", res.into_body());
 
     // assert_eq!(res.status(), StatusCode::OK);
 }
