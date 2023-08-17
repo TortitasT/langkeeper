@@ -16,7 +16,7 @@ pub struct NewUser {
     pub password: String,
 }
 
-#[derive(Deserialize, Validate)]
+#[derive(Deserialize, Serialize, Validate)]
 pub struct LoginUser {
     #[garde(email)]
     pub email: String,
