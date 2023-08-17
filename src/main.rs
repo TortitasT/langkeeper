@@ -14,6 +14,7 @@ mod jwt;
 mod tests;
 
 use actix_files::Files;
+use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
 use std::{env, process::exit};
 
 use actix_session::{storage::CookieSessionStore, SessionMiddleware};
@@ -91,12 +92,22 @@ async fn start_server() -> std::io::Result<()> {
     };
 
     println!("Starting server...");
-    println!("Address: http://{}:{}", address, port);
+    println!("Address: https://{}:{}", address, port);
+
+    // load TLS keys
+    // to create a self-signed temporary cert for testing:
+    // `openssl req -x509 -newkey rsa:4096 -nodes -keyout key.pem -out cert.pem -days 365 -subj '/CN=localhost'`
+    let mut builder = SslAcceptor::mozilla_intermediate(SslMethod::tls()).unwrap();
+    builder
+        .set_private_key_file("key.pem", SslFiletype::PEM)
+        .unwrap();
+    builder.set_certificate_chain_file("cert.pem").unwrap();
 
     let pool = db::get_connection_pool(None);
 
     HttpServer::new(move || generate_app(&pool))
-        .bind((address, port))?
+        // .bind((address, port))?
+        .bind_openssl((address, port), builder)?
         .run()
         .await?;
 
