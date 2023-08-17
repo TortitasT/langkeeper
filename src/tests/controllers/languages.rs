@@ -1,6 +1,6 @@
 use crate::{
     resources::{
-        languages::{NewLanguage, PingRequest, PingResponse},
+        languages::{LanguageStats, NewLanguage, PingRequest, PingResponse},
         users::{LoginUser, NewUser},
     },
     tests::init_service,
@@ -47,8 +47,8 @@ async fn test_ping_languages() {
 
     diesel::insert_into(crate::schema::languages::table)
         .values(NewLanguage {
-            name: "Rust".to_owned(),
-            extension: "rs".to_owned(),
+            name: "TestLang".to_owned(),
+            extension: "testlang".to_owned(),
         })
         .execute(&mut pool.get().unwrap())
         .unwrap();
@@ -57,12 +57,49 @@ async fn test_ping_languages() {
         .uri("/languages/ping")
         .cookie(session_cookie)
         .set_json(PingRequest {
-            extension: "rs".to_owned(),
+            extension: "testlang".to_owned(),
         })
         .send_request(&app)
         .await;
     assert_eq!(res.status(), StatusCode::OK);
 
     let body: PingResponse = test::read_body_json(res).await;
-    assert_eq!(body.language_name, "Rust");
+    assert_eq!(body.language_name, "TestLang");
+}
+
+#[actix_web::test]
+async fn test_get_stats() {
+    let (app, pool) = init_service().await;
+
+    let session_cookie = get_session_cookie(&app, &pool).await;
+
+    diesel::insert_into(crate::schema::languages::table)
+        .values(NewLanguage {
+            name: "TestLang".to_owned(),
+            extension: "testlang".to_owned(),
+        })
+        .execute(&mut pool.get().unwrap())
+        .unwrap();
+
+    test::TestRequest::post()
+        .uri("/languages/ping")
+        .cookie(session_cookie.clone())
+        .set_json(PingRequest {
+            extension: "testlang".to_owned(),
+        })
+        .send_request(&app)
+        .await;
+
+    let res = test::TestRequest::get()
+        .uri("/languages/stats")
+        .cookie(session_cookie)
+        .send_request(&app)
+        .await;
+    assert_eq!(res.status(), StatusCode::OK);
+
+    let body: Vec<LanguageStats> = test::read_body_json(res).await;
+
+    assert_eq!(body.len(), 1);
+    assert_eq!(body.get(0).unwrap().language_name, "TestLang");
+    assert_eq!(body.get(0).unwrap().minutes, 0);
 }
