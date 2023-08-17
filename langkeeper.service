@@ -10,7 +10,7 @@ Restart=always
 RestartSec=1
 User=root
 WorkingDirectory=/root/langkeeper/
-ExecStart=/root/langkeeper/target/release/langkeeper 8000
+ExecStart=/root/langkeeper/target/release/langkeeper serve 8002
 
 [Install]
 WantedBy=multi-user.target

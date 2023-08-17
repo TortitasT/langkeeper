@@ -3,6 +3,7 @@ pub mod middlewares;
 pub mod models;
 pub mod resources;
 pub mod schema;
+pub mod seeders;
 
 mod db;
 mod jwt;
@@ -10,7 +11,7 @@ mod jwt;
 #[cfg(test)]
 mod tests;
 
-use std::env;
+use std::{env, process::exit};
 
 use actix_session::{storage::CookieSessionStore, SessionMiddleware};
 use actix_web::{
@@ -30,8 +31,49 @@ async fn index() -> &'static str {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    match env::args().nth(1) {
+        Some(arg) => match arg.as_str() {
+            "migrate" => {
+                println!("Running migrations...");
+                println!("TODO: handle via `diesel migrations run` command for now");
+                // db::run_migrations().await?;
+                println!("Migrations completed");
+
+                exit(0)
+            }
+            "seed" => {
+                let pool = db::get_connection_pool(None);
+
+                println!("Seeding database...");
+                db::seed_database(&pool);
+                println!("Database seeded");
+
+                exit(0)
+            }
+            "serve" => {
+                start_server().await?;
+            }
+            _ => {
+                println!("Invalid argument provided");
+                println!("Usage: cargo run [migrate|seed|serve]");
+
+                exit(1)
+            }
+        },
+        None => {
+            println!("No argument provided");
+            println!("Usage: cargo run [migrate|seed|serve]");
+
+            exit(1)
+        }
+    }
+
+    Ok(())
+}
+
+async fn start_server() -> std::io::Result<()> {
     let address = "0.0.0.0";
-    let port = match env::args().nth(1) {
+    let port = match env::args().nth(2) {
         Some(port) => match port.parse::<u16>() {
             Ok(port) => port,
             Err(_) => {
@@ -53,7 +95,10 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || generate_app(&pool))
         .bind((address, port))?
         .run()
-        .await
+        .await?;
+
+    println!("Server stopped");
+    Ok(())
 }
 
 pub fn generate_app(

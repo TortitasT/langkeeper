@@ -3,6 +3,8 @@ use std::{env, process::exit};
 use diesel::{r2d2::ConnectionManager, SqliteConnection};
 use dotenvy::dotenv;
 
+use crate::DbPool;
+
 pub fn get_connection_pool(
     path: Option<String>,
 ) -> r2d2::Pool<ConnectionManager<SqliteConnection>> {
@@ -36,4 +38,8 @@ fn get_database_url() -> String {
             exit(1);
         }
     }
+}
+
+pub fn seed_database(pool: &DbPool) {
+    crate::seeders::languages::seed(&pool);
 }

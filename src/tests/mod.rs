@@ -25,6 +25,10 @@ async fn run_migrations(_pool: &DbPool) {
     }
 }
 
+async fn seed_database(pool: &DbPool) {
+    crate::seeders::languages::seed(&pool);
+}
+
 async fn clear_database(pool: &DbPool) {
     diesel::delete(crate::schema::users::table)
         .execute(&mut pool.get().unwrap())
@@ -39,6 +43,7 @@ pub async fn init_service() -> (
 
     run_migrations(&pool).await;
     clear_database(&pool).await;
+    seed_database(&pool).await;
 
     let app = test::init_service(generate_app(&pool)).await;
 
