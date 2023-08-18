@@ -129,7 +129,7 @@ pub fn generate_app(
     App::new()
         .wrap(
             SessionMiddleware::builder(CookieSessionStore::default(), Key::from(&[0; 64]))
-                .cookie_secure(false) // TODO: Remove this in production so only HTTPS is allowed
+                .cookie_secure(true)
                 .build(),
         )
         .app_data(web::Data::new(pool.clone()))
