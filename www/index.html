@@ -8,22 +8,24 @@
     <script src="https://unpkg.com/htmx.org@1.9.4"></script>
   </head>
   <body>
-    <h1>Login</h1>
+    <main>
+      <h1>Login</h1>
 
-    <form hx-post="/htmx/users/login">
-      <label>
-        <span>Email</span>
-        <input type="text" name="email" />
-      </label>
+      <form hx-post="/htmx/users/login">
+        <label>
+          <span>Email</span>
+          <input type="text" name="email" />
+        </label>
 
-      <label>
-        <span>Password</span>
-        <input type="password" name="password" />
-      </label>
+        <label>
+          <span>Password</span>
+          <input type="password" name="password" />
+        </label>
 
-      <button>Login</button>
+        <button>Login</button>
 
-      <a href="/signup.html">Don't have an account? Sign up</a>
-    </form>
+        <a href="/signup.html">Don't have an account? Sign up</a>
+      </form>
+    </main>
   </body>
 </html>

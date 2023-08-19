@@ -3,6 +3,13 @@ body {
     Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
 }
 
+main {
+  padding: 0 1em;
+
+  max-width: 500px;
+  margin: auto;
+}
+
 table {
   border-spacing: 0;
 }
@@ -20,8 +27,33 @@ form {
 form > label {
   display: flex;
   flex-direction: column;
-  margin-top: 1em;
+  gap: 0.25em;
 }
+form > label,
+form > a,
 form > button {
   margin-top: 1em;
+}
+
+input {
+  padding: 0.5em;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+
+  font-size: 1em;
+}
+
+button {
+  padding: 0.5em 1em;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+
+  font-size: 1em;
+  background: #fff;
+  cursor: pointer;
+
+  transition: background-color 0.2s ease;
+}
+button:hover {
+  background-color: #eee;
 }

@@ -8,31 +8,27 @@
     <script src="https://unpkg.com/htmx.org@1.9.4"></script>
   </head>
   <body>
-    <h1>Langkeeper</h1>
+    <main>
+      <h1>Langkeeper</h1>
 
-    <section>
-      <h2>User Management</h2>
+      <section>
+        <h2>Language Report</h2>
 
-      <pre hx-get="/users/me" hx-swap="outerHTML" hx-trigger="load"></pre>
-    </section>
-
-    <section>
-      <h2>Language Report</h2>
-
-      <table>
-        <thead>
-          <tr>
-            <th>Language</th>
-            <th>Extension</th>
-            <th>Minutes</th>
-          </tr>
-        </thead>
-        <tbody
-          hx-get="/htmx/languages/stats"
-          hx-trigger="load"
-          hx-swap="outerHTML"
-        ></tbody>
-      </table>
-    </section>
+        <table>
+          <thead>
+            <tr>
+              <th>Language</th>
+              <th>Extension</th>
+              <th>Total Time</th>
+            </tr>
+          </thead>
+          <tbody
+            hx-get="/htmx/languages/stats"
+            hx-trigger="load"
+            hx-swap="outerHTML"
+          ></tbody>
+        </table>
+      </section>
+    </main>
   </body>
 </html>

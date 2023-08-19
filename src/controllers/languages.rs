@@ -155,7 +155,9 @@ pub async fn language_controller_stats_htmx(
                     }
                     td {
                         (stat.hours) "h"
+                        " "
                         (stat.minutes) "m"
+                        " "
                         (stat.seconds) "s"
                     }
                 }
