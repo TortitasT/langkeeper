@@ -25,7 +25,7 @@ diesel::table! {
     users_languages (user_id, language_id) {
         user_id -> Integer,
         language_id -> Integer,
-        minutes -> Integer,
+        seconds -> BigInt,
         created_at -> Timestamp,
         updated_at -> Timestamp,
     }

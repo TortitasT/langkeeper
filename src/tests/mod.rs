@@ -1,6 +1,9 @@
 mod controllers;
 
-use std::process::exit;
+use std::{
+    fs::{remove_file, File},
+    process::exit,
+};
 
 use actix_http::Request;
 use actix_service::Service;
@@ -39,6 +42,8 @@ pub async fn init_service() -> (
     impl actix_service::Service<Request, Response = ServiceResponse, Error = actix_web::Error>,
     DbPool,
 ) {
+    remove_file("test.sqlite").unwrap_or(());
+
     let pool = crate::db::get_connection_pool(Option::from("test.sqlite".to_owned()));
 
     run_migrations(&pool).await;

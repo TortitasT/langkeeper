@@ -35,17 +35,21 @@ pub async fn language_controller_ping(
         .from_local_datetime(&users_languages.updated_at)
         .unwrap();
 
-    let minutes_since_last_update = chrono::Utc::now()
+    // let minutes_since_last_update = chrono::Utc::now()
+    //     .signed_duration_since(last_update)
+    //     .num_minutes();
+    let seconds_since_last_update = chrono::Utc::now()
         .signed_duration_since(last_update)
-        .num_minutes();
+        .num_seconds();
 
-    match minutes_since_last_update {
+    match seconds_since_last_update {
         i64::MIN..=0 => {}
-        1..=15 => {
+        1..=900 => {
+            // 15 minutes
             diesel::update(&users_languages)
                 .set((
-                    users_languages::minutes
-                        .eq(users_languages.minutes + minutes_since_last_update as i32),
+                    users_languages::seconds
+                        .eq(users_languages.seconds + seconds_since_last_update),
                     users_languages::updated_at.eq(chrono::Utc::now().naive_utc()),
                 ))
                 .execute(&mut *conn)
@@ -59,13 +63,16 @@ pub async fn language_controller_ping(
         }
     }
 
+    let duration = chrono::Duration::seconds(users_languages.seconds);
+
     return HttpResponse::Ok().json(PingResponse {
         user_id: auth_middleware.user_id,
         language_id: language.id,
         language_name: language.name,
         language_extension: language.extension,
-        minutes: users_languages.minutes,
-        minutes_since_last_update: minutes_since_last_update as i32,
+        hours: duration.num_hours(),
+        minutes: duration.num_minutes() % 60,
+        seconds: duration.num_seconds() % 60,
     });
 }
 
@@ -89,11 +96,15 @@ pub async fn language_controller_stats(
             .first::<crate::models::Language>(&mut *conn)
             .unwrap();
 
+        let duration = chrono::Duration::seconds(user_language.seconds);
+
         stats.push(LanguageStats {
             language_id: language.id,
             language_name: language.name,
             language_extension: language.extension,
-            minutes: user_language.minutes,
+            hours: duration.num_hours(),
+            minutes: duration.num_minutes() % 60,
+            seconds: duration.num_seconds() % 60,
         });
     }
 
@@ -120,11 +131,15 @@ pub async fn language_controller_stats_htmx(
             .first::<crate::models::Language>(&mut *conn)
             .unwrap();
 
+        let duration = chrono::Duration::seconds(user_language.seconds);
+
         stats.push(LanguageStats {
             language_id: language.id,
             language_name: language.name,
             language_extension: language.extension,
-            minutes: user_language.minutes,
+            hours: duration.num_hours(),
+            minutes: duration.num_minutes() % 60,
+            seconds: duration.num_seconds() % 60,
         });
     }
 
@@ -139,7 +154,9 @@ pub async fn language_controller_stats_htmx(
                         (stat.language_extension)
                     }
                     td {
-                        (stat.minutes)
+                        (stat.hours) "h"
+                        (stat.minutes) "m"
+                        (stat.seconds) "s"
                     }
                 }
             }
@@ -175,7 +192,7 @@ fn get_or_create_user_languages(
                 .values((
                     users_languages::user_id.eq(user_id),
                     users_languages::language_id.eq(language.id),
-                    users_languages::minutes.eq(0),
+                    users_languages::seconds.eq(0),
                 ))
                 .execute(conn)
                 .unwrap();

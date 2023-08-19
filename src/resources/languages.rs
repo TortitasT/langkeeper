@@ -20,8 +20,9 @@ pub struct PingResponse {
     pub language_id: i32,
     pub language_name: String,
     pub language_extension: String,
-    pub minutes: i32,
-    pub minutes_since_last_update: i32,
+    pub hours: i64,
+    pub minutes: i64,
+    pub seconds: i64,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -29,5 +30,7 @@ pub struct LanguageStats {
     pub language_id: i32,
     pub language_name: String,
     pub language_extension: String,
-    pub minutes: i32,
+    pub hours: i64,
+    pub minutes: i64,
+    pub seconds: i64,
 }
