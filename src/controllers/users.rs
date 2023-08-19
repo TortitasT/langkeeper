@@ -19,6 +19,7 @@ pub fn init(cfg: &mut actix_web::web::ServiceConfig) {
     cfg.service(user_controller_login);
     cfg.service(user_controller_login_htmx);
     cfg.service(user_controller_create);
+    cfg.service(user_controller_create_htmx);
     cfg.service(user_controller_show);
 }
 
@@ -138,6 +139,40 @@ pub async fn user_controller_create(
 
     match result {
         Ok(_) => HttpResponse::Created().body("User created"),
+        Err(_) => HttpResponse::InternalServerError().body("Something went wrong"),
+    }
+}
+
+#[post("/htmx/users")]
+pub async fn user_controller_create_htmx(
+    user: Form<NewUser>,
+    db_pool: Data<crate::DbPool>,
+) -> impl Responder {
+    let mut conn = db_pool.get().unwrap();
+
+    let mut new_user = NewUser {
+        name: user.name.clone(),
+        email: user.email.clone(),
+        password: user.password.clone(),
+    };
+
+    if let Err(error) = new_user.validate(&()) {
+        return HttpResponse::BadRequest().body(error.to_string());
+    }
+
+    new_user.password = match bcrypt::hash(&user.password, bcrypt::DEFAULT_COST) {
+        Ok(password) => password.to_string(),
+        Err(_) => return HttpResponse::InternalServerError().body("Something went wrong"),
+    };
+
+    let result = diesel::insert_into(users)
+        .values(&new_user)
+        .execute(&mut *conn);
+
+    match result {
+        Ok(_) => HttpResponse::Created()
+            .insert_header(("HX-Redirect", "/"))
+            .body("User created"),
         Err(_) => HttpResponse::InternalServerError().body("Something went wrong"),
     }
 }

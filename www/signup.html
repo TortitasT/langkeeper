@@ -3,14 +3,19 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Login - Langkeeper</title>
+    <title>Signup - Langkeeper</title>
     <link rel="stylesheet" href="style.css" />
     <script src="https://unpkg.com/htmx.org@1.9.4"></script>
   </head>
   <body>
-    <h1>Login</h1>
+    <h1>Signup</h1>
 
-    <form hx-post="/htmx/users/login">
+    <form hx-post="/htmx/users">
+      <label>
+        <span>Username</span>
+        <input type="text" name="name" />
+      </label>
+
       <label>
         <span>Email</span>
         <input type="text" name="email" />
@@ -21,9 +26,7 @@
         <input type="password" name="password" />
       </label>
 
-      <button>Login</button>
-
-      <a href="/signup.html">Don't have an account? Sign up</a>
+      <button>Create account</button>
     </form>
   </body>
 </html>
