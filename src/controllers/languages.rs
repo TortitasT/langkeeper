@@ -1,7 +1,7 @@
 use actix_web::web::Json;
 use actix_web::{get, post, web::Data, HttpResponse, Responder};
 use chrono::TimeZone;
-use typed_html::{html, text};
+use maud::{html, Markup};
 
 use crate::resources::languages::{LanguageStats, PingRequest, PingResponse};
 use crate::schema::*;
@@ -128,19 +128,25 @@ pub async fn language_controller_stats_htmx(
         });
     }
 
-    let html: typed_html::dom::DOMTree<String> = html!(
-        <tbody>
-            { stats.iter().map(|stat| html!(
-                <tr>
-                    <td>{ text!("{}", stat.language_name) }</td>
-                    <td>{ text!("{}", stat.language_extension) }</td>
-                    <td>{ text!("{}", stat.minutes) }</td>
-                </tr>
-            )) }
-        </tbody>
+    let html = html!(
+        tbody {
+            @for stat in stats {
+                tr {
+                    td {
+                        (stat.language_name)
+                    }
+                    td {
+                        (stat.language_extension)
+                    }
+                    td {
+                        (stat.minutes)
+                    }
+                }
+            }
+        }
     );
 
-    return HttpResponse::Ok().body(html.to_string());
+    return Markup::into_string(html);
 }
 
 fn get_language_by_extension(

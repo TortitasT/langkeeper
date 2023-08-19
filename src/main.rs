@@ -1,5 +1,3 @@
-#![recursion_limit = "256"]
-
 pub mod controllers;
 pub mod middlewares;
 pub mod models;
