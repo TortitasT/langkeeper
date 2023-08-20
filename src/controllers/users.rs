@@ -171,7 +171,7 @@ pub async fn user_controller_create_htmx(
 
     match result {
         Ok(_) => HttpResponse::Created()
-            .insert_header(("HX-Redirect", "/"))
+            .insert_header(("HX-Redirect", "/guide.html"))
             .body("User created"),
         Err(_) => HttpResponse::InternalServerError().body("Something went wrong"),
     }
