@@ -101,7 +101,7 @@ pub async fn user_controller_login_htmx(
                 session.insert("token", jwt).unwrap();
 
                 HttpResponse::Ok()
-                    .insert_header(("HX-Redirect", "/dashboard.html"))
+                    .insert_header(("HX-Redirect", "/dashboard"))
                     .body("User logged in")
             } else {
                 HttpResponse::Unauthorized().body("Invalid credentials")
@@ -171,7 +171,7 @@ pub async fn user_controller_create_htmx(
 
     match result {
         Ok(_) => HttpResponse::Created()
-            .insert_header(("HX-Redirect", "/guide.html"))
+            .insert_header(("HX-Redirect", "/guide"))
             .body("User created"),
         Err(_) => HttpResponse::InternalServerError().body("Something went wrong"),
     }
