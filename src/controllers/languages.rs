@@ -25,7 +25,8 @@ pub async fn language_controller_ping(
     let language = match get_language_by_extension(&request.extension, &mut *conn) {
         Ok(language) => language,
         Err(_) => {
-            return HttpResponse::NoContent().body("Language not found");
+            // return HttpResponse::NoContent().body("Language not found");
+            create_language(&request.extension, &mut *conn)
         }
     }; // TODO: can be done inside get_or_create_user_languages in one query
     let users_languages =
@@ -175,6 +176,24 @@ fn get_language_by_extension(
     languages::dsl::languages
         .filter(crate::schema::languages::extension.eq(extension))
         .first::<crate::models::Language>(conn)
+}
+
+fn create_language(
+    extension: &str,
+    conn: &mut diesel::SqliteConnection,
+) -> crate::models::Language {
+    diesel::insert_into(languages::dsl::languages)
+        .values((
+            languages::name.eq(extension),
+            languages::extension.eq(extension),
+        ))
+        .execute(conn)
+        .unwrap();
+
+    languages::dsl::languages
+        .filter(languages::extension.eq(extension))
+        .first::<crate::models::Language>(conn)
+        .unwrap()
 }
 
 fn get_or_create_user_languages(
