@@ -25,7 +25,10 @@ pub async fn language_controller_ping(
     let language = match get_language_by_extension(&request.extension, &mut *conn) {
         Ok(language) => language,
         Err(_) => {
-            // return HttpResponse::NoContent().body("Language not found");
+            if request.extension == "" {
+                return HttpResponse::NoContent().body("Language not found");
+            }
+
             create_language(&request.extension, &mut *conn)
         }
     }; // TODO: can be done inside get_or_create_user_languages in one query
