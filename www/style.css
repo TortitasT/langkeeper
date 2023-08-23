@@ -6,6 +6,12 @@ body {
 
 main {
   margin: auto;
+
+  background-color: #09090b;
+  color: white;
+
+  height: 100vh;
+  overflow: auto;
 }
 main.page--guide {
   max-width: 700px;
@@ -100,7 +106,6 @@ img {
 
 .page--signup {
   display: flex;
-  height: 100vh;
 }
 .page--signup__left {
   flex: 1;
@@ -115,8 +120,6 @@ img {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-}
-.page--signup__left__quote {
 }
 @media (max-width: 1000px) {
   .page--signup__left {
