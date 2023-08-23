@@ -105,10 +105,23 @@ img {
 .page--signup__left {
   flex: 1;
 
+  padding: 4em;
+
   background-color: #18181b;
   color: white;
 
   border-right: 1px solid #333;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.page--signup__left__quote {
+}
+@media (max-width: 1000px) {
+  .page--signup__left {
+    display: none;
+  }
 }
 .page--signup__right {
   flex: 1;
