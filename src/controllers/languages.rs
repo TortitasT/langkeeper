@@ -12,6 +12,7 @@ pub fn init(cfg: &mut actix_web::web::ServiceConfig) {
     cfg.service(language_controller_ping);
     cfg.service(language_controller_stats);
     cfg.service(language_controller_stats_htmx);
+    cfg.service(language_controller_total_time_htmx);
 }
 
 #[post("/languages/ping")]
@@ -170,6 +171,50 @@ pub async fn language_controller_stats_htmx(
     );
 
     return Markup::into_string(html);
+}
+
+#[get("/htmx/languages/total-time")]
+pub async fn language_controller_total_time_htmx(
+    db_pool: Data<DbPool>,
+    auth_middleware: AuthMiddleware,
+) -> impl Responder {
+    let mut conn = db_pool.get().unwrap();
+
+    let users_languages = users_languages::dsl::users_languages
+        .filter(users_languages::user_id.eq(auth_middleware.user_id))
+        .load::<crate::models::UserLanguage>(&mut *conn)
+        .unwrap();
+
+    let mut stats = Vec::new();
+
+    for user_language in users_languages {
+        let language = languages::dsl::languages
+            .find(user_language.language_id)
+            .first::<crate::models::Language>(&mut *conn)
+            .unwrap();
+
+        let duration = chrono::Duration::seconds(user_language.seconds);
+
+        stats.push(LanguageStats {
+            language_id: language.id,
+            language_name: language.name,
+            language_extension: language.extension,
+            hours: duration.num_hours(),
+            minutes: duration.num_minutes() % 60,
+            seconds: duration.num_seconds() % 60,
+        });
+    }
+
+    let total_hours = stats.iter().fold(0, |acc, stat| acc + stat.hours);
+
+    HttpResponse::Ok().body(format!(
+        "{} {}",
+        total_hours,
+        match total_hours {
+            1 => "hour",
+            _ => "hours",
+        }
+    ))
 }
 
 fn get_language_by_extension(

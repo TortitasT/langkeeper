@@ -18,7 +18,12 @@
           <h2>Last statistics</h2>
           <h3>
             You have been coding for a total of
-            <span hx-get="/htmx/languages/total-time">0</span> hours
+            <span
+              hx-get="/htmx/languages/total-time"
+              hx-trigger="load"
+              hx-swap="outerHTML"
+              >0</span
+            >
           </h3>
 
           <ul
