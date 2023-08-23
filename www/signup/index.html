@@ -8,29 +8,38 @@
     <script src="https://unpkg.com/htmx.org@1.9.4"></script>
   </head>
   <body>
-    <main>
-      <h1>Signup</h1>
+    <main class="page--signup">
+      <div class="page--signup__left">
+        <img src="logo.svg" alt="Langkeeper" class="page--signup__left__logo" />
 
-      <form hx-post="/htmx/users">
-        <label>
-          <span>Username</span>
-          <input type="text" name="name" />
-        </label>
+        <div class="page--signup__left__quote">
+          <p>
+            "The only way to learn a new programming language is by writing
+            programs in it."
+          </p>
 
-        <label>
-          <span>Email</span>
-          <input type="text" name="email" />
-        </label>
+          <small> Dennis Ritchie </small>
+        </div>
+      </div>
 
-        <label>
-          <span>Password</span>
-          <input type="password" name="password" />
-        </label>
+      <div class="page--signup__right">
+        <h1>Create an account</h1>
+        <h2>
+          Enter your name, email and password below to create your account
+        </h2>
 
-        <button>Create account</button>
+        <form hx-post="/htmx/users">
+          <input type="text" name="name" placeholder="John Doe" />
 
-        <a href="/">Already have an account? Login</a>
-      </form>
+          <input type="text" name="email" placeholder="example@domain.com" />
+
+          <input type="password" name="password" placeholder="*********" />
+
+          <button>Create account</button>
+
+          <a href="/">Already have an account? Login</a>
+        </form>
+      </div>
     </main>
   </body>
 </html>

@@ -8,24 +8,36 @@
     <script src="https://unpkg.com/htmx.org@1.9.4"></script>
   </head>
   <body>
-    <main>
-      <h1>Login</h1>
+    <main class="page--login">
+      <div class="page--login__left">
+        <img src="logo.svg" alt="Langkeeper" class="page--login__left__logo" />
 
-      <form hx-post="/htmx/users/login">
-        <label>
-          <span>Email</span>
-          <input type="text" name="email" />
-        </label>
+        <div class="page--login__left__quote">
+          <p>
+            "The only way to learn a new programming language is by writing
+            programs in it."
+          </p>
 
-        <label>
-          <span>Password</span>
-          <input type="password" name="password" />
-        </label>
+          <small> Dennis Ritchie </small>
+        </div>
+      </div>
 
-        <button>Login</button>
+      <div class="page--login__right">
+        <h1>Welcome back!</h1>
+        <h2>
+          Enter your email and password below to access your Langkeeper account.
+        </h2>
 
-        <a href="/signup">Don't have an account? Sign up</a>
-      </form>
+        <form hx-post="/htmx/users/login">
+          <input type="text" name="email" placeholder="example@domain.com" />
+
+          <input type="password" name="password" placeholder="*********" />
+
+          <button>Log in</button>
+
+          <a href="/signup">Don't have an account? Sign up</a>
+        </form>
+      </div>
     </main>
   </body>
 </html>
