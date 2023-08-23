@@ -155,14 +155,14 @@ pub async fn language_controller_stats_htmx(
                         (stat.language_name)
                     }
                     div class="page--dashboard__widget--stats__stat__extension" {
-                        (stat.language_extension)
+                        "." (stat.language_extension)
                     }
                     div class="page--dashboard__widget--stats__stat__time" {
-                        (stat.hours) "h"
-                        " "
-                        (stat.minutes) "m"
-                        " "
-                        (stat.seconds) "s"
+                        (format!("{:02}", stat.hours))
+                        ":"
+                        (format!("{:02}", stat.minutes))
+                        ":"
+                        (format!("{:02}", stat.seconds))
                     }
                 }
             }
