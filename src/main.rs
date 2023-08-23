@@ -12,10 +12,12 @@ mod jwt;
 mod tests;
 
 use actix_files::Files;
+use actix_http::header;
 use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
 use std::{env, process::exit};
 
 use actix_session::{storage::CookieSessionStore, SessionMiddleware};
+use actix_web::dev::Service;
 use actix_web::{
     cookie::Key,
     dev::{ServiceFactory, ServiceRequest, ServiceResponse},
@@ -134,6 +136,17 @@ pub fn generate_app(
         .service(checkhealth)
         .configure(controllers::users::init)
         .configure(controllers::languages::init)
+        .wrap_fn(|req, srv| {
+            let fut = srv.call(req);
+            async {
+                let mut res = fut.await?;
+                res.headers_mut().insert(
+                    header::CACHE_CONTROL,
+                    header::HeaderValue::from_static("no-cache"),
+                );
+                Ok(res)
+            }
+        })
         .service(
             Files::new("/", "./www")
                 .index_file("index.html")
