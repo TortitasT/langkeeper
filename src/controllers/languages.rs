@@ -148,16 +148,16 @@ pub async fn language_controller_stats_htmx(
     }
 
     let html = html!(
-        tbody {
+        ul {
             @for stat in stats {
-                tr {
-                    td {
+                li class="page--dashboard__widget--stats__stat" {
+                    div class="page--dashboard__widget--stats__stat__name" {
                         (stat.language_name)
                     }
-                    td {
+                    div class="page--dashboard__widget--stats__stat__extension" {
                         (stat.language_extension)
                     }
-                    td {
+                    div class="page--dashboard__widget--stats__stat__time" {
                         (stat.hours) "h"
                         " "
                         (stat.minutes) "m"

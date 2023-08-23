@@ -8,26 +8,25 @@
     <script src="https://unpkg.com/htmx.org@1.9.4"></script>
   </head>
   <body>
-    <main>
-      <h1>Langkeeper</h1>
+    <main class="page--dashboard">
+      <h1>Dashboard</h1>
 
-      <section>
-        <h2>Language Report</h2>
+      <hr />
 
-        <table>
-          <thead>
-            <tr>
-              <th>Language</th>
-              <th>Extension</th>
-              <th>Total Time</th>
-            </tr>
-          </thead>
-          <tbody
+      <section class="page--dashboard__widgets">
+        <section class="page--dashboard__widget page--dashboard__widget--stats">
+          <h2>Last statistics</h2>
+          <h3>
+            You have been coding for a total of
+            <span hx-get="/htmx/languages/total-time">0</span> hours
+          </h3>
+
+          <ul
             hx-get="/htmx/languages/stats"
             hx-trigger="load"
             hx-swap="outerHTML"
-          ></tbody>
-        </table>
+          ></ul>
+        </section>
       </section>
 
       <section class="page--dashboard__guide">
