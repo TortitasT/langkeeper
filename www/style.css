@@ -10,7 +10,7 @@ body {
 main {
   margin: auto;
 
-  height: 100vh;
+  height: 100svh;
   overflow: auto;
 }
 
