@@ -40,9 +40,6 @@ pub async fn language_controller_ping(
         .from_local_datetime(&users_languages.updated_at)
         .unwrap();
 
-    // let minutes_since_last_update = chrono::Utc::now()
-    //     .signed_duration_since(last_update)
-    //     .num_minutes();
     let seconds_since_last_update = chrono::Utc::now()
         .signed_duration_since(last_update)
         .num_seconds();
@@ -125,6 +122,7 @@ pub async fn language_controller_stats_htmx(
 
     let users_languages = users_languages::dsl::users_languages
         .filter(users_languages::user_id.eq(auth_middleware.user_id))
+        .order(users_languages::seconds.desc())
         .load::<crate::models::UserLanguage>(&mut *conn)
         .unwrap();
 
