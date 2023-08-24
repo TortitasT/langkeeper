@@ -122,6 +122,9 @@ img {
   flex-direction: column;
   justify-content: space-between;
 }
+.page--signup__left__logo {
+  width: 200px;
+}
 @media (max-width: 1000px) {
   .page--signup__left {
     display: none;
@@ -168,6 +171,9 @@ img {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+}
+.page--login__left__logo {
+  width: 200px;
 }
 @media (max-width: 1000px) {
   .page--login__left {
