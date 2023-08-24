@@ -4,3 +4,4 @@ database.sqlite
 test.sqlite
 cert.pem
 key.pem
+.DS_Store
