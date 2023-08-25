@@ -1,4 +1,5 @@
 pub mod controllers;
+pub mod mailer;
 pub mod middlewares;
 pub mod models;
 pub mod resources;
@@ -25,6 +26,8 @@ use actix_web::{
     App, HttpServer,
 };
 use diesel::SqliteConnection;
+
+use crate::mailer::send_text_mail;
 
 type DbPool = r2d2::Pool<diesel::r2d2::ConnectionManager<SqliteConnection>>;
 
