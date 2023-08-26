@@ -3,7 +3,7 @@ use mail_send::{mail_builder::MessageBuilder, SmtpClientBuilder};
 
 use crate::logger::log;
 
-pub async fn send_text_mail(to: &str, subject: &str, text: &str) {
+pub async fn send_mail(to: &str, subject: &str, content: &String, html: bool) {
     dotenv().ok();
 
     let address = std::env::var("MAILER_ADDRESS").unwrap();
@@ -18,8 +18,13 @@ pub async fn send_text_mail(to: &str, subject: &str, text: &str) {
     let message = MessageBuilder::new()
         .from(("Langkeeper", email.as_str()))
         .to(to)
-        .subject(subject)
-        .text_body(text);
+        .subject(subject);
+
+    let message = if html {
+        message.html_body(content)
+    } else {
+        message.text_body(content)
+    };
 
     match SmtpClientBuilder::new(address.clone(), port)
         .credentials((username, password))
