@@ -17,10 +17,10 @@ pub fn log(message: &str, level: LogLevel) {
     dotenv().ok();
 
     let header = match level {
-        LogLevel::Info => format!("{}", "[INFO]"),
-        LogLevel::Warn => format!("{}", "[WARN]"),
-        LogLevel::Error => format!("{}", "[ERROR]"),
-        LogLevel::Debug => format!("{}", "[DEBUG]"),
+        LogLevel::Info => "[INFO]",
+        LogLevel::Warn => "[WARN]",
+        LogLevel::Error => "[ERROR]",
+        LogLevel::Debug => "[DEBUG]",
     };
 
     println!(
