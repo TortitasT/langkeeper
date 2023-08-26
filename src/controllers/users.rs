@@ -8,10 +8,11 @@ use actix_web::{
 };
 use dotenvy::dotenv;
 use garde::Validate;
+use maud::html;
 
 use crate::{
     jwt::{decode_auth_jwt, generate_auth_jwt},
-    mailer::send_text_mail,
+    mailer::send_mail,
     middlewares::auth::AuthMiddleware,
     models::User,
     resources::users::{LoginUser, NewUser, ShowUser},
@@ -255,20 +256,29 @@ fn send_verification_email(user: &User) {
 
     let app_url = std::env::var("APP_URL").unwrap();
 
+    let user_email = user.email.clone();
+    let user_name = user.name.clone();
+
     let token = generate_auth_jwt(user);
     let url = format!("{}/users/verify/{}", app_url, token.unwrap());
-    let email_text: String = format!(
-        "Hi {}!\nPlease verify your email by clicking on this link: {}",
-        user.name, url
+    let email_html = html!(
+    p {
+        "Hi " (user_name) "!"
+    }
+    p {
+        "Please verify your email by clicking on the following link: "
+        a href=(url) {
+            "Verify!"
+        }
+    }
     );
 
-    let user_email = user.email.clone();
-
     tokio::spawn(async move {
-        send_text_mail(
+        send_mail(
             &user_email,
             "Verify your account at Langkeeper",
-            &email_text,
+            &email_html.into_string(),
+            true,
         )
         .await;
     });
