@@ -1,4 +1,5 @@
 pub mod controllers;
+pub mod logger;
 pub mod mailer;
 pub mod middlewares;
 pub mod models;
@@ -12,9 +13,12 @@ mod jwt;
 #[cfg(test)]
 mod tests;
 
+use crate::logger::{log, LogLevel};
+
 use actix_files::Files;
 use actix_http::header;
 use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
+use std::process::Command;
 use std::{env, process::exit};
 
 use actix_session::{storage::CookieSessionStore, SessionMiddleware};
@@ -26,8 +30,6 @@ use actix_web::{
     App, HttpServer,
 };
 use diesel::SqliteConnection;
-
-use crate::mailer::send_text_mail;
 
 type DbPool = r2d2::Pool<diesel::r2d2::ConnectionManager<SqliteConnection>>;
 
@@ -41,19 +43,21 @@ async fn main() -> std::io::Result<()> {
     match env::args().nth(1) {
         Some(arg) => match arg.as_str() {
             "migrate" => {
-                println!("Running migrations...");
-                println!("TODO: handle via `diesel migrations run` command for now");
-                // db::run_migrations().await?;
-                println!("Migrations completed");
+                log("Running migrations...", LogLevel::Info);
+                Command::new("diesel")
+                    .args(&["migrations", "run"])
+                    .output()
+                    .expect("failed to execute process");
+                log("Migrations completed", LogLevel::Info);
 
                 exit(0)
             }
             "seed" => {
                 let pool = db::get_connection_pool(None);
 
-                println!("Seeding database...");
+                log("Seeding database...", LogLevel::Info);
                 db::seed_database(&pool);
-                println!("Database seeded");
+                log("Database seeded", LogLevel::Info);
 
                 exit(0)
             }
@@ -61,15 +65,15 @@ async fn main() -> std::io::Result<()> {
                 start_server().await?;
             }
             _ => {
-                println!("Invalid argument provided");
-                println!("Usage: cargo run [migrate|seed|serve]");
+                log("Invalid argument provided", LogLevel::Error);
+                log("Usage: cargo run [migrate|seed|serve]", LogLevel::Error);
 
                 exit(1)
             }
         },
         None => {
-            println!("No argument provided");
-            println!("Usage: cargo run [migrate|seed|serve]");
+            log("No argument provided", LogLevel::Error);
+            log("Usage: cargo run [migrate|seed|serve]", LogLevel::Error);
 
             exit(1)
         }
@@ -84,18 +88,27 @@ async fn start_server() -> std::io::Result<()> {
         Some(port) => match port.parse::<u16>() {
             Ok(port) => port,
             Err(_) => {
-                println!("Invalid port provided, using default port 8000");
+                log(
+                    "Invalid port provided, using default port 8000",
+                    LogLevel::Warn,
+                );
                 8000
             }
         },
         None => {
-            println!("No port provided, using default port 8000");
+            log(
+                "Invalid port provided, using default port 8000",
+                LogLevel::Warn,
+            );
             8000
         }
     };
 
-    println!("Starting server...");
-    println!("Address: https://{}:{}", address, port);
+    log("Starting server...", LogLevel::Info);
+    log(
+        &format!("Address: https://{}:{}", address, port),
+        LogLevel::Info,
+    );
 
     // load TLS keys
     // to create a self-signed temporary cert for testing:
@@ -114,7 +127,7 @@ async fn start_server() -> std::io::Result<()> {
         .run()
         .await?;
 
-    println!("Server stopped");
+    log("Server stopped", LogLevel::Info);
     Ok(())
 }
 

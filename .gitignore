@@ -5,3 +5,5 @@ test.sqlite
 cert.pem
 key.pem
 .DS_Store
+*.log.*
+*.log
