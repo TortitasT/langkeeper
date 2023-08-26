@@ -1,7 +1,7 @@
 mod controllers;
 
 use std::{
-    fs::{remove_file, File},
+    fs::{remove_file},
     process::exit,
 };
 

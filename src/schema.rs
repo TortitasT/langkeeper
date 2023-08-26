@@ -35,4 +35,8 @@ diesel::table! {
 diesel::joinable!(users_languages -> languages (language_id));
 diesel::joinable!(users_languages -> users (user_id));
 
-diesel::allow_tables_to_appear_in_same_query!(languages, users, users_languages,);
+diesel::allow_tables_to_appear_in_same_query!(
+    languages,
+    users,
+    users_languages,
+);
