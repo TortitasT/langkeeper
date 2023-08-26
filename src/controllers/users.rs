@@ -1,13 +1,19 @@
+use std::os::unix::thread;
+
 use actix_session::Session;
 use actix_web::{
     get, post,
     web::{Data, Form, Json},
-    HttpResponse, Responder,
+    HttpRequest, HttpResponse, Responder,
 };
+use dotenvy::dotenv;
 use garde::Validate;
 
 use crate::{
+    jwt::{decode_auth_jwt, generate_auth_jwt},
+    mailer::send_text_mail,
     middlewares::auth::AuthMiddleware,
+    models::User,
     resources::users::{LoginUser, NewUser, ShowUser},
     schema::users::dsl::users,
 };
@@ -21,6 +27,7 @@ pub fn init(cfg: &mut actix_web::web::ServiceConfig) {
     cfg.service(user_controller_create);
     cfg.service(user_controller_create_htmx);
     cfg.service(user_controller_show);
+    cfg.service(user_controller_verify);
 }
 
 #[get("/users")]
@@ -170,9 +177,18 @@ pub async fn user_controller_create_htmx(
         .execute(&mut *conn);
 
     match result {
-        Ok(_) => HttpResponse::Created()
-            .insert_header(("HX-Redirect", "/guide"))
-            .body("User created"),
+        Ok(_) => {
+            let user = users
+                .filter(crate::schema::users::email.eq(&user.email))
+                .first::<crate::models::User>(&mut *conn)
+                .unwrap();
+
+            send_verification_email(&user);
+
+            HttpResponse::Created()
+                .insert_header(("HX-Redirect", "/guide"))
+                .body("User created")
+        }
         Err(_) => HttpResponse::InternalServerError().body("Something went wrong"),
     }
 }
@@ -199,4 +215,61 @@ pub async fn user_controller_show(
         Ok(user) => HttpResponse::Ok().json(user),
         Err(_) => HttpResponse::InternalServerError().body("Something went wrong"),
     }
+}
+
+#[get("/users/verify/{token}")]
+pub async fn user_controller_verify(
+    db_pool: Data<crate::DbPool>,
+    req: HttpRequest,
+) -> impl actix_web::Responder {
+    let token = req.match_info().get("token").unwrap();
+    let mut conn = db_pool.get().unwrap();
+
+    let user_id = decode_auth_jwt(token);
+    let user_id = match user_id {
+        Ok(user_id) => user_id.sub,
+        Err(_) => return HttpResponse::Unauthorized().body("Invalid token"),
+    };
+
+    let user = users
+        .filter(crate::schema::users::id.eq(user_id))
+        .first::<User>(&mut *conn);
+
+    if let Err(_) = user {
+        return HttpResponse::Unauthorized().body("Invalid token");
+    }
+
+    let result = diesel::update(users.find(user_id))
+        .set(crate::schema::users::verified.eq(1))
+        .execute(&mut *conn);
+
+    match result {
+        Ok(_) => HttpResponse::Ok().body("User verified successfully"),
+        Err(_) => HttpResponse::InternalServerError()
+            .body("Something went wrong, please try again later :("),
+    }
+}
+
+fn send_verification_email(user: &User) {
+    dotenv().ok();
+
+    let app_url = std::env::var("APP_URL").unwrap();
+
+    let token = generate_auth_jwt(user);
+    let url = format!("{}/users/verify/{}", app_url, token.unwrap());
+    let email_text: String = format!(
+        "Hi {}!\nPlease verify your email by clicking on this link: {}",
+        user.name, url
+    );
+
+    let user_email = user.email.clone();
+
+    tokio::spawn(async move {
+        send_text_mail(
+            &user_email,
+            "Verify your account at Langkeeper",
+            &email_text,
+        )
+        .await;
+    });
 }

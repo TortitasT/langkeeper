@@ -11,6 +11,7 @@ pub struct User {
     pub password: String,
     pub created_at: chrono::NaiveDateTime,
     pub updated_at: chrono::NaiveDateTime,
+    pub verified: i32,
 }
 
 #[derive(Queryable, Selectable, Serialize, Deserialize)]
