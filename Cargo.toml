@@ -26,3 +26,4 @@ actix-files = "0.6.2"
 maud = { version = "0.25.0", features = ["actix-web"] }
 mail-send = "0.4.0"
 colored = "2.0.4"
+rand = "0.8.5"
