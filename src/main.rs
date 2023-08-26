@@ -14,6 +14,7 @@ mod jwt;
 mod tests;
 
 use crate::logger::{log, LogLevel};
+use crate::mailer::send_verification_email;
 
 use actix_files::Files;
 use actix_http::header;
@@ -21,6 +22,8 @@ use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
 use std::fs::File;
 use std::io::{Read, Write};
 use std::process::Command;
+use std::thread;
+use std::time::Duration;
 use std::{env, process::exit};
 
 use actix_session::{storage::CookieSessionStore, SessionMiddleware};
@@ -97,6 +100,24 @@ async fn main() -> std::io::Result<()> {
 
                 log("JWT secret generated", LogLevel::Info);
                 exit(0)
+            }
+            "email:verify_current" => {
+                use crate::schema::users::dsl::*;
+                use diesel::prelude::*;
+
+                let pool = db::get_connection_pool(None);
+                let mut conn = pool.get().unwrap();
+
+                let unverified_users = schema::users::dsl::users
+                    .filter(verified.eq(0))
+                    .load::<models::User>(&mut conn)
+                    .unwrap();
+
+                for user in unverified_users {
+                    send_verification_email(&user);
+
+                    tokio::time::sleep(Duration::from_secs(2)).await;
+                }
             }
             "serve" => {
                 start_server().await?;

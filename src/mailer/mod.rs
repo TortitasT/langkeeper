@@ -1,7 +1,8 @@
 use dotenvy::dotenv;
 use mail_send::{mail_builder::MessageBuilder, SmtpClientBuilder};
+use maud::html;
 
-use crate::logger::log;
+use crate::{jwt::generate_auth_jwt, logger::log, models::User};
 
 pub async fn send_mail(to: &str, subject: &str, content: &String, html: bool) {
     dotenv().ok();
@@ -47,4 +48,42 @@ pub async fn send_mail(to: &str, subject: &str, content: &String, html: bool) {
             crate::logger::LogLevel::Error,
         ),
     };
+}
+
+pub fn send_verification_email(user: &User) {
+    dotenv().ok();
+
+    let app_url = std::env::var("APP_URL").unwrap();
+
+    let user_email = user.email.clone();
+    let user_name = user.name.clone();
+
+    let token = generate_auth_jwt(user);
+    let url = format!("{}/users/verify/{}", app_url, token.unwrap());
+    let email_html = html!(
+    p {
+        "Hi " (user_name) "!"
+    }
+    p {
+        "Please verify your email by clicking on the following link: "
+        a href=(url) {
+            "Verify!"
+        }
+    }
+    );
+
+    log(
+        format!("Sending verification email to {}", user_email).as_str(),
+        crate::logger::LogLevel::Info,
+    );
+
+    tokio::spawn(async move {
+        send_mail(
+            &user_email,
+            "Verify your account at Langkeeper",
+            &email_html.into_string(),
+            true,
+        )
+        .await;
+    });
 }
