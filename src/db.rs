@@ -3,7 +3,7 @@ use std::{env, process::exit};
 use diesel::{r2d2::ConnectionManager, SqliteConnection};
 use dotenvy::dotenv;
 
-use crate::DbPool;
+use crate::{logger::log, DbPool};
 
 pub fn get_connection_pool(
     path: Option<String>,
@@ -13,7 +13,10 @@ pub fn get_connection_pool(
     match r2d2::Pool::builder().build(manager) {
         Ok(pool) => pool,
         Err(e) => {
-            println!("Failed to create pool: {}", e);
+            log(
+                format!("Failed to create pool: {}", e).as_str(),
+                crate::logger::LogLevel::Error,
+            );
             exit(1);
         }
     }
@@ -34,7 +37,10 @@ fn get_database_url() -> String {
     match env::var("DATABASE_URL") {
         Ok(url) => url,
         Err(_) => {
-            println!("DATABASE_URL not set, remember to create a `.env` file and run `diesel migration run`");
+            log(
+                "DATABASE_URL not set, remember to create a `.env` file and run `diesel migration run`",
+                crate::logger::LogLevel::Error,
+            );
             exit(1);
         }
     }

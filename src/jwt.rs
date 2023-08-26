@@ -1,4 +1,4 @@
-use crate::models::User;
+use crate::{logger::log, models::User};
 use chrono::Utc;
 use jsonwebtoken::{encode, DecodingKey, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
@@ -13,7 +13,7 @@ fn get_jwt_secret() -> String {
     match std::env::var("JWT_SECRET") {
         Ok(secret) => secret,
         Err(_) => {
-            println!("JWT_SECRET not set, remember to create a `.env` file and run `diesel migration run`");
+            log("JWT_SECRET not set, remember to create a `.env` file and run `diesel migration run`", crate::logger::LogLevel::Error);
             std::process::exit(1);
         }
     }

@@ -1,6 +1,8 @@
 use dotenvy::dotenv;
 use mail_send::{mail_builder::MessageBuilder, SmtpClientBuilder};
 
+use crate::logger::log;
+
 pub async fn send_text_mail(to: &str, subject: &str, text: &str) {
     dotenv().ok();
 
@@ -26,9 +28,18 @@ pub async fn send_text_mail(to: &str, subject: &str, text: &str) {
         .await
     {
         Ok(mut client) => match client.send(message).await {
-            Ok(_) => println!("Email sent successfully to {}!", to),
-            Err(e) => println!("Error sending email to {}: {}", to, e),
+            Ok(_) => log(
+                format!("Successfully sent email to {}", to).as_str(),
+                crate::logger::LogLevel::Info,
+            ),
+            Err(e) => log(
+                format!("Failed to send email to {}: {}", to, e).as_str(),
+                crate::logger::LogLevel::Error,
+            ),
         },
-        Err(e) => println!("Error connecting to {}: {}", address, e),
+        Err(e) => log(
+            format!("Failed to connect to {}: {}", address, e).as_str(),
+            crate::logger::LogLevel::Error,
+        ),
     };
 }

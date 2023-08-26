@@ -10,7 +10,7 @@ use actix_service::Service;
 use actix_web::{dev::ServiceResponse, http::StatusCode, test};
 use diesel::RunQueryDsl;
 
-use crate::{generate_app, DbPool};
+use crate::{generate_app, logger::log, DbPool};
 
 async fn run_migrations(_pool: &DbPool) {
     // let conn = _pool.get().unwrap();
@@ -22,7 +22,10 @@ async fn run_migrations(_pool: &DbPool) {
     {
         Ok(_) => (),
         Err(e) => {
-            println!("Error running migrations: {}", e);
+            log(
+                format!("Error running migrations: {}", e).as_str(),
+                crate::logger::LogLevel::Error,
+            );
             exit(1);
         }
     }
