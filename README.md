@@ -1,3 +1,9 @@
+# Langkeeper service
+
+[vscode extension](https://github.com/TortitasT/vscode-langkeeper)
+
+[neovim extension](https://github.com/TortitasT/langkeeper.nvim)
+
 ## Diesel with sqlite install on Windows for development
 
 Install sqlite with chocolatey.
