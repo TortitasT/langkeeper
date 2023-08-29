@@ -1,8 +1,12 @@
-# Langkeeper service
+# Langkeeper
+
+Keep track of the time you spend on each language.
 
 [vscode extension](https://github.com/TortitasT/vscode-langkeeper)
 
 [neovim extension](https://github.com/TortitasT/langkeeper.nvim)
+
+![imagen](https://github.com/TortitasT/langkeeper/assets/102045600/8d0b83fb-2f5f-49f3-a73d-4d043b17fab5)
 
 ## Diesel with sqlite install on Windows for development
 
