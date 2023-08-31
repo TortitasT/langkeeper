@@ -32,11 +32,24 @@ diesel::table! {
     }
 }
 
+diesel::table! {
+    users_languages_weekly (user_id, language_id) {
+        user_id -> Integer,
+        language_id -> Integer,
+        seconds -> BigInt,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
+    }
+}
+
 diesel::joinable!(users_languages -> languages (language_id));
 diesel::joinable!(users_languages -> users (user_id));
+diesel::joinable!(users_languages_weekly -> languages (language_id));
+diesel::joinable!(users_languages_weekly -> users (user_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
     languages,
     users,
     users_languages,
+    users_languages_weekly,
 );
