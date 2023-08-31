@@ -1,6 +1,6 @@
 use actix_web::web::Json;
 use actix_web::{get, post, web::Data, HttpResponse, Responder};
-use chrono::TimeZone;
+use chrono::{Datelike, TimeZone};
 use maud::{html, Markup};
 
 use crate::resources::languages::{LanguageStats, PingRequest, PingResponse};
@@ -36,6 +36,9 @@ pub async fn language_controller_ping(
     let users_languages =
         get_or_create_user_languages(&auth_middleware.user_id, &language, &mut *conn);
 
+    let users_languages_weekly =
+        get_or_create_user_languages_weekly(&auth_middleware.user_id, &language, &mut *conn);
+
     let last_update = chrono::Utc
         .from_local_datetime(&users_languages.updated_at)
         .unwrap();
@@ -45,8 +48,8 @@ pub async fn language_controller_ping(
         .num_seconds();
 
     match seconds_since_last_update {
-        i64::MIN..=0 => {}
-        1..=900 => {
+        i64::MIN..=1 => {}
+        2..=900 => {
             // 15 minutes
             diesel::update(&users_languages)
                 .set((
@@ -54,6 +57,14 @@ pub async fn language_controller_ping(
                         .eq(users_languages.seconds + seconds_since_last_update),
                     users_languages::updated_at.eq(chrono::Utc::now().naive_utc()),
                 ))
+                .execute(&mut *conn)
+                .unwrap();
+
+            diesel::update(&users_languages_weekly)
+                .set(
+                    users_languages_weekly::seconds
+                        .eq(users_languages_weekly.seconds + seconds_since_last_update),
+                )
                 .execute(&mut *conn)
                 .unwrap();
         }
@@ -270,4 +281,53 @@ fn get_or_create_user_languages(
                 .unwrap()
         }
     }
+}
+
+fn get_or_create_user_languages_weekly(
+    user_id: &i32,
+    language: &crate::models::Language,
+    conn: &mut diesel::SqliteConnection,
+) -> crate::models::UserLanguageWeekly {
+    let last_monday = get_last_monday_date();
+
+    let users_languages_weekly =
+        users_languages_weekly::dsl::users_languages_weekly
+            .filter(users_languages_weekly::user_id.eq(user_id))
+            .filter(users_languages_weekly::language_id.eq(language.id))
+            .filter(users_languages_weekly::created_at.gt(last_monday).and(
+                users_languages_weekly::created_at.lt(last_monday + chrono::Duration::days(7)),
+            ))
+            .first::<crate::models::UserLanguageWeekly>(conn);
+
+    match users_languages_weekly {
+        Ok(users_languages_weekly) => users_languages_weekly,
+        Err(_) => {
+            diesel::insert_into(users_languages_weekly::dsl::users_languages_weekly)
+                .values((
+                    users_languages_weekly::user_id.eq(user_id),
+                    users_languages_weekly::language_id.eq(language.id),
+                    users_languages_weekly::seconds.eq(0),
+                ))
+                .execute(conn)
+                .unwrap();
+
+            users_languages_weekly::dsl::users_languages_weekly
+                .select(users_languages_weekly::all_columns)
+                .filter(users_languages_weekly::user_id.eq(user_id))
+                .filter(users_languages_weekly::language_id.eq(language.id))
+                .filter(users_languages_weekly::created_at.gt(last_monday).and(
+                    users_languages_weekly::created_at.lt(last_monday + chrono::Duration::days(7)),
+                ))
+                .first::<crate::models::UserLanguageWeekly>(conn)
+                .unwrap()
+        }
+    }
+}
+
+fn get_last_monday_date() -> chrono::NaiveDateTime {
+    let now = chrono::Utc::now();
+    let days_since_monday = now.weekday().num_days_from_monday();
+    let last_monday = now - chrono::Duration::days(days_since_monday.into());
+
+    last_monday.naive_utc()
 }

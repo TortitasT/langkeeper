@@ -37,3 +37,16 @@ pub struct UserLanguage {
     pub created_at: chrono::NaiveDateTime,
     pub updated_at: chrono::NaiveDateTime,
 }
+
+#[derive(Identifiable, Selectable, Queryable, Associations, Debug, Serialize, Deserialize)]
+#[diesel(belongs_to(User))]
+#[diesel(belongs_to(Language))]
+#[diesel(table_name = crate::schema::users_languages_weekly)]
+#[diesel(primary_key(id))]
+pub struct UserLanguageWeekly {
+    pub id: i32,
+    pub user_id: i32,
+    pub language_id: i32,
+    pub seconds: i64,
+    pub created_at: chrono::NaiveDateTime,
+}

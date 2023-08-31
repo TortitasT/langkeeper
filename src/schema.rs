@@ -33,12 +33,12 @@ diesel::table! {
 }
 
 diesel::table! {
-    users_languages_weekly (user_id, language_id) {
+    users_languages_weekly (id) {
+        id -> Integer,
         user_id -> Integer,
         language_id -> Integer,
         seconds -> BigInt,
         created_at -> Timestamp,
-        updated_at -> Timestamp,
     }
 }
 
