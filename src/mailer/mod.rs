@@ -77,7 +77,7 @@ pub fn send_verification_email(user: &User) {
         crate::logger::LogLevel::Info,
     );
 
-    tokio::spawn(async move {
+    actix_rt::spawn(async move {
         send_mail(
             &user_email,
             "Verify your account at Langkeeper",

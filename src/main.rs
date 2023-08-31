@@ -7,6 +7,7 @@ pub mod resources;
 pub mod schema;
 pub mod seeders;
 
+mod commands;
 mod db;
 mod jwt;
 
@@ -18,11 +19,11 @@ use crate::mailer::send_verification_email;
 
 use actix_files::Files;
 use actix_http::header;
+use commands::parse_arguments;
 use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
 use std::fs::File;
 use std::io::{Read, Write};
 use std::process::Command;
-use std::thread;
 use std::time::Duration;
 use std::{env, process::exit};
 
@@ -45,97 +46,13 @@ async fn checkhealth() -> &'static str {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    match env::args().nth(1) {
-        Some(arg) => match arg.as_str() {
-            "migrate" => {
-                log("Running migrations...", LogLevel::Info);
-                Command::new("diesel")
-                    .args(&["migrations", "run"])
-                    .output()
-                    .expect("failed to execute process");
-                log("Migrations completed", LogLevel::Info);
-
-                exit(0)
-            }
-            "seed" => {
-                let pool = db::get_connection_pool(None);
-
-                log("Seeding database...", LogLevel::Info);
-                db::seed_database(&pool);
-                log("Database seeded", LogLevel::Info);
-
-                exit(0)
-            }
-            "key:generate" => {
-                use rand::Rng;
-                const CHARSET: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZ\
-                            abcdefghijklmnopqrstuvwxyz\
-                            0123456789)(*%#@!~";
-                const PASSWORD_LEN: usize = 30;
-                let mut rng = rand::thread_rng();
-
-                let password: String = (0..PASSWORD_LEN)
-                    .map(|_| {
-                        let idx = rng.gen_range(0..CHARSET.len());
-                        CHARSET[idx] as char
-                    })
-                    .collect();
-
-                let mut file = File::open(".env")?;
-                let mut contents = String::new();
-                file.read_to_string(&mut contents)?;
-
-                let mut new_contents = String::new();
-                for line in contents.lines() {
-                    if line.starts_with("JWT_SECRET=") {
-                        new_contents.push_str(&format!("JWT_SECRET={}\n", password));
-                    } else {
-                        new_contents.push_str(&format!("{}\n", line));
-                    }
-                }
-
-                let mut file = File::create(".env")?;
-                file.write_all(new_contents.as_bytes())?;
-                file.sync_all()?;
-
-                log("JWT secret generated", LogLevel::Info);
-                exit(0)
-            }
-            "email:verify_current" => {
-                use crate::schema::users::dsl::*;
-                use diesel::prelude::*;
-
-                let pool = db::get_connection_pool(None);
-                let mut conn = pool.get().unwrap();
-
-                let unverified_users = schema::users::dsl::users
-                    .filter(verified.eq(0))
-                    .load::<models::User>(&mut conn)
-                    .unwrap();
-
-                for user in unverified_users {
-                    send_verification_email(&user);
-
-                    tokio::time::sleep(Duration::from_secs(2)).await;
-                }
-            }
-            "serve" => {
-                start_server().await?;
-            }
-            _ => {
-                log("Invalid argument provided", LogLevel::Error);
-                log("Usage: cargo run [migrate|seed|serve]", LogLevel::Error);
-
-                exit(1)
-            }
-        },
-        None => {
-            log("No argument provided", LogLevel::Error);
-            log("Usage: cargo run [migrate|seed|serve]", LogLevel::Error);
-
-            exit(1)
-        }
-    }
+    parse_arguments().await.unwrap_or_else(|err| {
+        log(
+            &format!("Error parsing arguments: {}", err),
+            LogLevel::Error,
+        );
+        exit(1)
+    });
 
     Ok(())
 }
