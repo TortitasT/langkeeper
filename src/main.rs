@@ -9,6 +9,7 @@ pub mod seeders;
 
 mod commands;
 mod db;
+mod jobs;
 mod jwt;
 
 #[cfg(test)]
@@ -16,14 +17,11 @@ mod tests;
 
 use crate::logger::{log, LogLevel};
 
-
 use actix_files::Files;
 use actix_http::header;
 use commands::parse_arguments;
+use jobs::init_jobs;
 use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
-
-
-
 
 use std::{env, process::exit};
 
@@ -84,6 +82,8 @@ async fn start_server() -> std::io::Result<()> {
         &format!("Address: https://{}:{}", address, port),
         LogLevel::Info,
     );
+
+    init_jobs();
 
     // load TLS keys
     // to create a self-signed temporary cert for testing:
