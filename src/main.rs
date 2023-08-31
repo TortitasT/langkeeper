@@ -15,16 +15,16 @@ mod jwt;
 mod tests;
 
 use crate::logger::{log, LogLevel};
-use crate::mailer::send_verification_email;
+
 
 use actix_files::Files;
 use actix_http::header;
 use commands::parse_arguments;
 use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
-use std::fs::File;
-use std::io::{Read, Write};
-use std::process::Command;
-use std::time::Duration;
+
+
+
+
 use std::{env, process::exit};
 
 use actix_session::{storage::CookieSessionStore, SessionMiddleware};

@@ -4,13 +4,13 @@ use actix_web::{
     web::{Data, Form, Json},
     HttpRequest, HttpResponse, Responder,
 };
-use dotenvy::dotenv;
+
 use garde::Validate;
-use maud::html;
+
 
 use crate::{
-    jwt::{decode_auth_jwt, generate_auth_jwt},
-    mailer::{send_mail, send_verification_email},
+    jwt::{decode_auth_jwt},
+    mailer::{send_verification_email},
     middlewares::auth::AuthMiddleware,
     models::User,
     resources::users::{LoginUser, NewUser, ShowUser},
