@@ -324,7 +324,7 @@ fn get_or_create_user_languages_weekly(
     }
 }
 
-fn get_last_monday_date() -> chrono::NaiveDateTime {
+pub fn get_last_monday_date() -> chrono::NaiveDateTime {
     let now = chrono::Utc::now();
     let days_since_monday = now.weekday().num_days_from_monday();
     let last_monday = now - chrono::Duration::days(days_since_monday.into());
