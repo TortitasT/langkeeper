@@ -59,6 +59,10 @@ fn init_weekly_report() {
                             .load::<crate::models::UserLanguageWeekly>(&mut conn)
                             .unwrap();
 
+                        if reports.len() == 0 {
+                            continue;
+                        }
+
                         let mut stats = Vec::new();
 
                         for report in reports {
