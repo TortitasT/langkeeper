@@ -1,6 +1,6 @@
 use actix_web::web::Json;
 use actix_web::{get, post, web::Data, HttpResponse, Responder};
-use chrono::{Datelike, TimeZone};
+use chrono::{TimeZone};
 use maud::{html, Markup};
 
 use crate::resources::languages::{LanguageStats, PingRequest, PingResponse};
