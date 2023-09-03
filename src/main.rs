@@ -1,4 +1,5 @@
 pub mod controllers;
+pub mod jobs;
 pub mod logger;
 pub mod mailer;
 pub mod middlewares;
@@ -10,7 +11,6 @@ pub mod utils;
 
 mod commands;
 mod db;
-mod jobs;
 mod jwt;
 
 #[cfg(test)]

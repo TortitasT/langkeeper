@@ -1,4 +1,5 @@
 mod key_generate;
+mod send_report;
 
 use std::{
     env,
@@ -53,6 +54,9 @@ pub async fn parse_arguments() -> io::Result<()> {
                 for user in unverified_users {
                     send_verification_email(&user);
                 }
+            }
+            "send_report" => {
+                send_report::send_report().await?;
             }
             "serve" => {
                 start_server().await?;

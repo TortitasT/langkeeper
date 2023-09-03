@@ -53,7 +53,7 @@ pub fn init_weekly_report() {
     });
 }
 
-async fn send_weekly_report(
+pub async fn send_weekly_report(
     user: &User,
     last_monday: &chrono::NaiveDateTime,
     conn: &mut PooledConnection<ConnectionManager<SqliteConnection>>,
