@@ -104,7 +104,7 @@ fn init_weekly_report() {
                                 @for stat in stats {
                                     tr {
                                         td {
-                                            (stat.language_name) " (" (stat.language_extension) ")"
+                                            (stat.language_name) " (." (stat.language_extension) ")"
                                         }
                                         td {
                                             (stat.hours) "h " (stat.minutes) "m " (stat.seconds) "s"
