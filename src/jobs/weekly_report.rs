@@ -6,12 +6,12 @@ use diesel::r2d2::ConnectionManager;
 use maud::html;
 use r2d2::PooledConnection;
 
-use crate::controllers::languages::get_last_monday_date;
 use crate::mailer::send_mail;
 use crate::models::User;
 use crate::resources::languages::LanguageStats;
 use crate::schema::users::dsl::*;
 use crate::schema::{languages, users_languages_weekly};
+use crate::utils::get_last_monday_date;
 use crate::{
     db,
     logger::{log, LogLevel},

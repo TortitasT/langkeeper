@@ -6,6 +6,7 @@ pub mod models;
 pub mod resources;
 pub mod schema;
 pub mod seeders;
+pub mod utils;
 
 mod commands;
 mod db;

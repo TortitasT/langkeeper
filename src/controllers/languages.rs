@@ -5,6 +5,7 @@ use maud::{html, Markup};
 
 use crate::resources::languages::{LanguageStats, PingRequest, PingResponse};
 use crate::schema::*;
+use crate::utils::get_last_monday_date;
 use crate::{middlewares::auth::AuthMiddleware, DbPool};
 use diesel::prelude::*;
 
@@ -322,12 +323,4 @@ fn get_or_create_user_languages_weekly(
                 .unwrap()
         }
     }
-}
-
-pub fn get_last_monday_date() -> chrono::NaiveDateTime {
-    let now = chrono::Utc::now();
-    let days_since_monday = now.weekday().num_days_from_monday();
-    let last_monday = now - chrono::Duration::days(days_since_monday.into());
-
-    last_monday.naive_utc()
 }
