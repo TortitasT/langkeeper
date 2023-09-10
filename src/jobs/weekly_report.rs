@@ -21,7 +21,7 @@ use diesel::prelude::*;
 pub fn init_weekly_report() {
     actix_rt::spawn(async move {
         //                sec   min     hour    day of month    month   day of week   year
-        let expression = "0     0       9       *               *       1             *";
+        let expression = "0     0       9       *               *       2             *";
         let schedule = Schedule::from_str(expression).unwrap();
 
         loop {
