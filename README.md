@@ -50,26 +50,6 @@ cargo install cargo-watch
 cargo watch -x "run serve"
 ```
 
-## Useful commands
-
-Login
-
-```bash
-http --session=./session.json post localhost:8000/users/login email=admin@langmer.es password=secret
-```
-
-Ping a language
-
-```bash
-http --session=./session.json post localhost:8000/languages/ping extension=.c
-```
-
-Get user data
-
-```bash
-http --session=./session.json get localhost:8000/users/me
-```
-
 ## Deploy
 
 Clone
@@ -98,7 +78,7 @@ service langkeeper start
 
 ## Tests
 
-Run with logs and in single thread so database lock is ok.
+Run with logs and in single thread so sqlite database works.
 
 ```bash
 cargo test -- --nocapture --test-threads=1
