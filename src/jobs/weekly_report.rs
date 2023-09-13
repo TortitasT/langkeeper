@@ -1,7 +1,3 @@
-use std::{str::FromStr, time::Duration};
-
-use chrono::Local;
-use cron::Schedule;
 use diesel::r2d2::ConnectionManager;
 use maud::html;
 use r2d2::PooledConnection;
@@ -16,41 +12,35 @@ use crate::{
     db,
     logger::{log, LogLevel},
 };
+use actix_jobs::Job;
 use diesel::prelude::*;
 
-pub fn init_weekly_report() {
-    actix_rt::spawn(async move {
-        //                sec   min     hour    day of month    month   day of week   year
-        let expression = "0     0       9       *               *       2             *";
-        let schedule = Schedule::from_str(expression).unwrap();
+pub struct WeeklyReportJob {}
 
-        loop {
-            let mut upcoming = schedule.upcoming(Local).take(1);
+impl Job for WeeklyReportJob {
+    fn cron(&self) -> &str {
+        "0 0 9 * * 2 *"
+    }
 
-            actix_rt::time::sleep(Duration::from_millis(500)).await;
+    fn run(&mut self) {
+        actix_rt::spawn(async move {
+            log("Starting weekly report", LogLevel::Info);
 
-            let local = &Local::now();
-            if let Some(datetime) = upcoming.next() {
-                if datetime.timestamp() <= local.timestamp() {
-                    log("Starting weekly report", LogLevel::Info);
+            let last_monday = get_last_monday_date();
 
-                    let last_monday = get_last_monday_date();
+            let mut conn = db::get_connection_pool(None).get().unwrap();
 
-                    let mut conn = db::get_connection_pool(None).get().unwrap();
+            let users_result = users
+                .filter(crate::schema::users::verified.eq(1))
+                .select(crate::schema::users::all_columns)
+                .load::<User>(&mut conn)
+                .unwrap();
 
-                    let users_result = users
-                        .filter(crate::schema::users::verified.eq(1))
-                        .select(crate::schema::users::all_columns)
-                        .load::<User>(&mut conn)
-                        .unwrap();
-
-                    for user in users_result {
-                        send_weekly_report(&user, &last_monday, &mut conn).await;
-                    }
-                }
+            for user in users_result {
+                send_weekly_report(&user, &last_monday, &mut conn).await;
             }
-        }
-    });
+        });
+    }
 }
 
 pub async fn send_weekly_report(
