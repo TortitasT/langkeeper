@@ -1,6 +1,6 @@
 use actix_web::web::Json;
 use actix_web::{get, post, web::Data, HttpResponse, Responder};
-use chrono::{TimeZone};
+use chrono::TimeZone;
 use maud::{html, Markup};
 
 use crate::resources::languages::{LanguageStats, PingRequest, PingResponse};
@@ -290,15 +290,17 @@ fn get_or_create_user_languages_weekly(
     conn: &mut diesel::SqliteConnection,
 ) -> crate::models::UserLanguageWeekly {
     let last_monday = get_last_monday_date();
+    let this_monday = last_monday + chrono::Duration::days(7);
 
-    let users_languages_weekly =
-        users_languages_weekly::dsl::users_languages_weekly
-            .filter(users_languages_weekly::user_id.eq(user_id))
-            .filter(users_languages_weekly::language_id.eq(language.id))
-            .filter(users_languages_weekly::created_at.gt(last_monday).and(
-                users_languages_weekly::created_at.lt(last_monday + chrono::Duration::days(7)),
-            ))
-            .first::<crate::models::UserLanguageWeekly>(conn);
+    let users_languages_weekly = users_languages_weekly::dsl::users_languages_weekly
+        .filter(users_languages_weekly::user_id.eq(user_id))
+        .filter(users_languages_weekly::language_id.eq(language.id))
+        .filter(
+            users_languages_weekly::created_at
+                .gt(last_monday)
+                .and(users_languages_weekly::created_at.lt(this_monday)),
+        )
+        .first::<crate::models::UserLanguageWeekly>(conn);
 
     match users_languages_weekly {
         Ok(users_languages_weekly) => users_languages_weekly,
@@ -313,12 +315,13 @@ fn get_or_create_user_languages_weekly(
                 .unwrap();
 
             users_languages_weekly::dsl::users_languages_weekly
-                .select(users_languages_weekly::all_columns)
                 .filter(users_languages_weekly::user_id.eq(user_id))
                 .filter(users_languages_weekly::language_id.eq(language.id))
-                .filter(users_languages_weekly::created_at.gt(last_monday).and(
-                    users_languages_weekly::created_at.lt(last_monday + chrono::Duration::days(7)),
-                ))
+                .filter(
+                    users_languages_weekly::created_at
+                        .gt(last_monday)
+                        .and(users_languages_weekly::created_at.lt(this_monday)),
+                )
                 .first::<crate::models::UserLanguageWeekly>(conn)
                 .unwrap()
         }
