@@ -1,6 +1,6 @@
 [package]
 name = "langkeeper"
-version = "1.0.0"
+version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -30,3 +30,4 @@ rand = "0.8.5"
 tokio = "1.32.0"
 actix-rt = "2.9.0"
 cron = "0.12.0"
+actix-jobs = "0.1.0"

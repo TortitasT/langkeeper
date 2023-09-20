@@ -1,7 +1,13 @@
-use self::weekly_report::init_weekly_report;
+use actix_jobs::{run_forever, Scheduler};
+
+use self::weekly_report::WeeklyReportJob;
 
 pub mod weekly_report;
 
 pub fn init_jobs() {
-    init_weekly_report();
+    let mut scheduler = Scheduler::new();
+
+    scheduler.add(Box::new(WeeklyReportJob {}));
+
+    run_forever(scheduler);
 }
