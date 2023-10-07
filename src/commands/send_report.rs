@@ -24,7 +24,7 @@ pub async fn send_report() -> std::io::Result<()> {
         .first::<crate::models::User>(&mut conn)
         .expect("User not found");
 
-    let last_monday = get_last_monday_date();
+    let last_monday = get_last_monday_date(None);
 
     send_weekly_report(&user, &last_monday, &mut conn).await;
 

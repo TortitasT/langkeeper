@@ -34,16 +34,15 @@ pub async fn language_controller_ping(
             create_language(&request.extension, &mut *conn)
         }
     }; // TODO: can be done inside get_or_create_user_languages in one query
+
     let users_languages =
         get_or_create_user_languages(&auth_middleware.user_id, &language, &mut *conn);
-
     let users_languages_weekly =
         get_or_create_user_languages_weekly(&auth_middleware.user_id, &language, &mut *conn);
 
     let last_update = chrono::Utc
         .from_local_datetime(&users_languages.updated_at)
         .unwrap();
-
     let seconds_since_last_update = chrono::Utc::now()
         .signed_duration_since(last_update)
         .num_seconds();
@@ -289,7 +288,7 @@ fn get_or_create_user_languages_weekly(
     language: &crate::models::Language,
     conn: &mut diesel::SqliteConnection,
 ) -> crate::models::UserLanguageWeekly {
-    let last_monday = get_last_monday_date();
+    let last_monday = get_last_monday_date(None);
     let this_monday = last_monday + chrono::Duration::days(7);
 
     let users_languages_weekly = users_languages_weekly::dsl::users_languages_weekly
