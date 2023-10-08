@@ -26,7 +26,7 @@ impl Job for WeeklyReportJob {
         actix_rt::spawn(async move {
             log("Starting weekly report", LogLevel::Info);
 
-            let last_monday = get_last_monday_date();
+            let last_monday = get_last_monday_date(None);
 
             let mut conn = db::get_connection_pool(None).get().unwrap();
 

@@ -1,9 +1,7 @@
 mod controllers;
+mod utils;
 
-use std::{
-    fs::{remove_file},
-    process::exit,
-};
+use std::{fs::remove_file, process::exit};
 
 use actix_http::Request;
 use actix_service::Service;
