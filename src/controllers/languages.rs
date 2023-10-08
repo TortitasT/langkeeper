@@ -289,16 +289,12 @@ fn get_or_create_user_languages_weekly(
     conn: &mut diesel::SqliteConnection,
 ) -> crate::models::UserLanguageWeekly {
     let last_monday = get_last_monday_date(None);
-    let this_monday = last_monday + chrono::Duration::days(7);
 
     let users_languages_weekly = users_languages_weekly::dsl::users_languages_weekly
         .filter(users_languages_weekly::user_id.eq(user_id))
         .filter(users_languages_weekly::language_id.eq(language.id))
-        .filter(
-            users_languages_weekly::created_at
-                .gt(last_monday)
-                .and(users_languages_weekly::created_at.lt(this_monday)),
-        )
+        .filter(users_languages_weekly::created_at.gt(last_monday))
+        .order(users_languages_weekly::created_at.desc())
         .first::<crate::models::UserLanguageWeekly>(conn);
 
     match users_languages_weekly {
@@ -316,11 +312,8 @@ fn get_or_create_user_languages_weekly(
             users_languages_weekly::dsl::users_languages_weekly
                 .filter(users_languages_weekly::user_id.eq(user_id))
                 .filter(users_languages_weekly::language_id.eq(language.id))
-                .filter(
-                    users_languages_weekly::created_at
-                        .gt(last_monday)
-                        .and(users_languages_weekly::created_at.lt(this_monday)),
-                )
+                .filter(users_languages_weekly::created_at.gt(last_monday))
+                .order(users_languages_weekly::created_at.desc())
                 .first::<crate::models::UserLanguageWeekly>(conn)
                 .unwrap()
         }
