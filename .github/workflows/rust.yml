@@ -2,21 +2,38 @@ name: Rust
 
 on:
   push:
-    branches: [ "master" ]
+    branches: ["master"]
   pull_request:
-    branches: [ "master" ]
+    branches: ["master"]
 
 env:
   CARGO_TERM_COLOR: always
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Build
-      run: cargo build --verbose
-    - name: Run tests
-      run: cargo test --verbose -- --nocapture --test-threads=1
+      - uses: actions/checkout@v3
+
+      - name: Install toolchain
+        uses: actions-rs/toolchain@v1
+        if: ${{ env.ACT }}
+        with:
+          profile: minimal
+          toolchain: stable
+
+      - name: Install diesel-cli
+        run: cargo install diesel_cli --no-default-features --features sqlite
+
+      - name: Create self signed ssl cert
+        run: openssl req -x509 -newkey rsa:4096 -nodes -keyout key.pem -out cert.pem -days 365 -subj '/CN=localhost'
+
+      - name: Create .env
+        run: cp .env.example .env
+
+      - name: Build
+        run: cargo build --verbose
+
+      - name: Run tests
+        run: cargo test --verbose -- --nocapture --test-threads=1
