@@ -1,4 +1,4 @@
-name: Rust
+name: Tests
 
 on:
   push:
@@ -15,6 +15,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+
+      - name: Set timezone
+        run: sudo timedatectl set-timezone Europe/Madrid && timedatectl
 
       - name: Install toolchain
         uses: actions-rs/toolchain@v1
