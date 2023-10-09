@@ -32,6 +32,17 @@
             hx-swap="outerHTML"
           ></ul>
         </section>
+
+        <section class="page--dashboard__widget page--dashboard__widget--stats">
+          <h2>This week's statistics</h2>
+          <h3>Nice work!</h3>
+
+          <ul
+            hx-get="/htmx/languages/stats_weekly"
+            hx-trigger="load"
+            hx-swap="outerHTML"
+          ></ul>
+        </section>
       </section>
 
       <section class="page--dashboard__guide">
