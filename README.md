@@ -1,5 +1,7 @@
 # Langkeeper
 
+[![Tests](https://github.com/TortitasT/langkeeper/actions/workflows/rust.yml/badge.svg)](https://github.com/TortitasT/langkeeper/actions/workflows/rust.yml)
+
 Keep track of the time you spend on each language.
 
 [vscode extension](https://github.com/TortitasT/vscode-langkeeper)
