@@ -123,7 +123,11 @@ img {
   justify-content: space-between;
 }
 .page--signup__left__logo {
-  width: 200px;
+  display: flex;
+  align-items: center;
+
+  font-weight: bold;
+  font-size: 1.5em;
 }
 @media (max-width: 1000px) {
   .page--signup__left {
@@ -173,7 +177,11 @@ img {
   justify-content: space-between;
 }
 .page--login__left__logo {
-  width: 200px;
+  display: flex;
+  align-items: center;
+
+  font-weight: bold;
+  font-size: 1.5em;
 }
 @media (max-width: 1000px) {
   .page--login__left {
