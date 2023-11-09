@@ -176,13 +176,16 @@ img {
   flex-direction: column;
   justify-content: space-between;
 }
-.page--login__left__logo {
+
+.logo {
   display: flex;
   align-items: center;
-
+}
+.logo__text {
   font-weight: bold;
   font-size: 1.5em;
 }
+
 @media (max-width: 1000px) {
   .page--login__left {
     display: none;
