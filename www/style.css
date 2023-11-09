@@ -179,8 +179,6 @@ img {
 
 .page--dashboard__widgets {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  grid-auto-rows: min-content;
   gap: 2em;
 }
 
