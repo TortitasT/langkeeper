@@ -5,14 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Login - Langkeeper</title>
     <link rel="stylesheet" href="style.css" />
-    <script src="https://unpkg.com/htmx.org@1.9.4"></script>
+    <script src="htmx.min.js"></script>
   </head>
   <body>
     <main class="page--login">
-      <div class="page--login__left">
-        <img src="logo.png" alt="Langkeeper" class="page--login__left__logo" />
+      <div class="left">
+        <div class="logo">
+          <img src="logo.png" alt="Langkeeper logo" width="75" height="75" />
+          <div class="logo__text">Langkeeper</div>
+        </div>
 
-        <div class="page--login__left__quote">
+        <div>
           <p>
             "The only way to learn a new programming language is by writing
             programs in it."
@@ -22,7 +25,7 @@
         </div>
       </div>
 
-      <div class="page--login__right">
+      <div class="right">
         <h1>Welcome back!</h1>
         <h2>
           Enter your email and password below to access your Langkeeper account.
