@@ -1,0 +1,23 @@
+{
+  "short_name": "Langkeeper",
+  "name": "Langkeeper",
+  "icons": [
+    {
+      "src": "/images/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/images/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "id": "/?source=pwa",
+  "start_url": "/?source=pwa",
+  "background_color": "#09090B",
+  "display": "standalone",
+  "scope": "/",
+  "theme_color": "#09090B",
+  "description": "Keep track of the time you spend programming."
+}
