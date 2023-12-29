@@ -1300,6 +1300,7 @@ dependencies = [
  "chrono",
  "colored",
  "cron",
+ "derive_more",
  "diesel",
  "dotenvy",
  "futures",

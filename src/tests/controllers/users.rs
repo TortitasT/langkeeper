@@ -76,3 +76,16 @@ async fn test_login() {
     assert_eq!(body.name, "test");
     assert_eq!(body.email, "test@test.test");
 }
+
+#[actix_web::test]
+async fn test_auth_middleware_unauthorized() {
+    let (app, _pool) = init_service().await;
+
+    let res = test::TestRequest::get()
+        .uri("/users/me")
+        .send_request(&app)
+        .await;
+
+    assert_eq!(res.status(), StatusCode::UNAUTHORIZED);
+    assert_eq!(res.headers().get("HX-Redirect").unwrap(), "/");
+}
