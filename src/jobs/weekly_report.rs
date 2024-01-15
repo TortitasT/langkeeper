@@ -106,6 +106,7 @@ pub fn get_weekly_stats(
         .filter(users_languages_weekly::created_at.gt(last_monday).and(
             users_languages_weekly::created_at.lt(last_monday.clone() + chrono::Duration::days(7)),
         ))
+        .order(users_languages_weekly::seconds.desc())
         .load::<crate::models::UserLanguageWeekly>(conn)
         .unwrap();
 
